@@ -17,9 +17,9 @@ public class PasswordHasher : IPasswordHasher
     private const int HashSize = 16; // Size in bytes for the hash.
 
     // Configurable Argon2 parameters to allow flexibility based on the deployment environment.
-    public int DegreeOfParallelism { get; set; } = 8;
-    public int Iterations { get; set; } = 4;
-    public int MemorySize { get; set; } = 1024 * 1024; // 1 GB
+    private int DegreeOfParallelism { get; } = 8;
+    private int Iterations { get; } = 4;
+    private int MemorySize { get; } = 1024 * 1024; // 1 GB
 
     /// <summary>
     ///     Hashes a password using Argon2id with improved security measures.
@@ -48,10 +48,10 @@ public class PasswordHasher : IPasswordHasher
     /// <returns>A result indicating if the password is correct or not.</returns>
     public Result VerifyPassword(string password, string expectedCombinedHash)
     {
-        var combinedBytes = Array.Empty<byte>();
+        byte[] combinedBytes;
         try
         {
-             combinedBytes = Convert.FromBase64String(expectedCombinedHash);
+            combinedBytes = Convert.FromBase64String(expectedCombinedHash);
         }
         catch (FormatException)
         {
@@ -67,16 +67,11 @@ public class PasswordHasher : IPasswordHasher
         return isValid ? Result.Success() : Result.Failure("Password is incorrect");
     }
 
-    private Argon2id CreateArgon2(string password, byte[] salt)
-    {
-        return new Argon2id(Encoding.UTF8.GetBytes(password))
+    private Argon2id CreateArgon2(string password, byte[] salt) =>
+        new(Encoding.UTF8.GetBytes(password))
         {
-            Salt = salt,
-            DegreeOfParallelism = DegreeOfParallelism,
-            Iterations = Iterations,
-            MemorySize = MemorySize
+            Salt = salt, DegreeOfParallelism = DegreeOfParallelism, Iterations = Iterations, MemorySize = MemorySize
         };
-    }
 
     private static byte[] GenerateRandomSalt()
     {

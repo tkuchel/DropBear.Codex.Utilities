@@ -197,7 +197,6 @@ public static class BinaryAndHexConverter
 
         var hex = new StringBuilder(bytes.Length * 2);
         foreach (var b in bytes) hex.Append(CultureInfo.CurrentCulture, $"{b:x2}");
-
         return hex.ToString();
     }
 
@@ -207,7 +206,7 @@ public static class BinaryAndHexConverter
     /// <param name="value">The binary string to validate.</param>
     /// <returns>True if the string is a valid binary representation; otherwise, false.</returns>
     public static bool IsValidBinaryString(string value) =>
-        !string.IsNullOrEmpty(value) && value.All(c => c == '0' || c == '1');
+        !string.IsNullOrEmpty(value) && value.All(c => c is '0' or '1');
 
     /// <summary>
     ///     Converts a hexadecimal string to its original string representation.
@@ -260,8 +259,8 @@ public static class BinaryAndHexConverter
     /// <param name="binary2">The second binary string.</param>
     /// <returns>The result of the bitwise XOR operation as a binary string.</returns>
     // ReSharper disable once InconsistentNaming
-    public static string BitwiseXOR(string binary1, string binary2) =>
-        PerformBitwiseOperation(binary1, binary2, (b1, b2) => (b1 ^ b2).ToString(CultureInfo.CurrentCulture));
+    public static string BitwiseXOR(string binary1, string binary2) => PerformBitwiseOperation(binary1, binary2,
+        (b1, b2) => (b1 ^ b2).ToString(CultureInfo.CurrentCulture));
 
     /// <summary>
     ///     Performs a bitwise NOT operation on a binary string.
@@ -278,7 +277,7 @@ public static class BinaryAndHexConverter
     /// <param name="shift">The number of bits to shift.</param>
     /// <returns>The shifted binary string.</returns>
     public static string ShiftLeft(string binary, int shift) =>
-        binary.PadRight(binary.Length + shift, '0').Substring(0, binary.Length);
+        binary.PadRight(binary.Length + shift, '0')[..binary.Length];
 
     /// <summary>
     ///     Shifts a binary string to the right by a specified number of bits.
@@ -286,8 +285,7 @@ public static class BinaryAndHexConverter
     /// <param name="binary">The binary string to shift.</param>
     /// <param name="shift">The number of bits to shift.</param>
     /// <returns>The shifted binary string.</returns>
-    public static string ShiftRight(string binary, int shift) =>
-        binary.PadLeft(binary.Length + shift, '0').Substring(shift);
+    public static string ShiftRight(string binary, int shift) => binary.PadLeft(binary.Length + shift, '0')[shift..];
 
     /// <summary>
     ///     Performs a specified bitwise operation on two binary strings.
