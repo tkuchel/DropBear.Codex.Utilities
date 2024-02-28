@@ -18,16 +18,18 @@ public static class TaskHelper
     {
         using var timeoutCancellationTokenSource = new CancellationTokenSource();
         var completedTask =
-            await Task.WhenAny(taskSource.Task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
+            await Task.WhenAny(taskSource.Task, Task.Delay(timeout, timeoutCancellationTokenSource.Token))
+                .ConfigureAwait(false);
 
         if (completedTask == taskSource.Task)
         {
-            timeoutCancellationTokenSource.Cancel(); // Cancel the delay task to free up resources.
-            return await taskSource.Task; // Return the result of the completed task.
+            await timeoutCancellationTokenSource.CancelAsync()
+                .ConfigureAwait(false); // Cancel the delay task to free up resources.
+            return await taskSource.Task.ConfigureAwait(false); // Return the result of the completed task.
         }
 
         // If the task source task did not complete, attempt to transition it to a Canceled state.
-        taskSource.TrySetCanceled();
+        taskSource.TrySetCanceled(timeoutCancellationTokenSource.Token);
 
         throw new TaskCanceledException("The operation has timed out.");
     }

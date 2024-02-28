@@ -19,7 +19,7 @@ public static partial class StringHelper
     /// <returns>The input string with its first character in uppercase.</returns>
     public static string FirstCharToUpper(this string input)
     {
-        return string.IsNullOrEmpty(input) ? input : char.ToUpper(input[0]) + input[1..];
+        return string.IsNullOrEmpty(input) ? input : char.ToUpper(input[0],CultureInfo.CurrentCulture) + input[1..];
     }
 
     /// <summary>
@@ -94,20 +94,19 @@ public static partial class StringHelper
     }
 
     /// <summary>
-    ///     Converts a string to MD5 hash.
+    /// Converts a string to a SHA256 hash.
     /// </summary>
     /// <param name="str">The string to convert.</param>
-    /// <returns>The MD5 hash of the string.</returns>
-    public static string ToMd5(this string str)
+    /// <returns>The SHA256 hash of the string.</returns>
+    public static string ToSha256(this string str)
     {
         ArgumentNullException.ThrowIfNull(str);
-
-        using var md5 = MD5.Create();
         var inputBytes = Encoding.UTF8.GetBytes(str);
-        var hashBytes = md5.ComputeHash(inputBytes);
+        var hashBytes = SHA256.HashData(inputBytes);
 
         var sb = new StringBuilder();
-        foreach (var hashByte in hashBytes) sb.Append(hashByte.ToString("X2"));
+        foreach (var hashByte in hashBytes)
+            sb.Append(hashByte.ToString("X2"));
 
         return sb.ToString();
     }
@@ -134,7 +133,7 @@ public static partial class StringHelper
     }
 
     /// <summary>
-    ///     Converts a string to PascalCase.
+    /// Converts a string to PascalCase with a regex evaluation timeout.
     /// </summary>
     /// <param name="input">The string to convert.</param>
     /// <returns>The input string in PascalCase.</returns>
@@ -143,8 +142,9 @@ public static partial class StringHelper
         if (string.IsNullOrEmpty(input)) return input;
 
         var textInfo = CultureInfo.CurrentCulture.TextInfo;
-        var formattedString = Regex.Replace(input, "(?<=[a-z])([A-Z])", " $1").Trim();
-        return textInfo.ToTitleCase(formattedString.ToLowerInvariant()).Replace(" ", string.Empty);
+        // Set a timeout of 1 second for regex evaluation to enhance security and performance
+        var formattedString = Regex.Replace(input, "(?<=[a-z])([A-Z])", " $1", RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(1)).Trim();
+        return textInfo.ToTitleCase(formattedString.ToUpperInvariant()).Replace(" ", string.Empty, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -166,7 +166,7 @@ public static partial class StringHelper
     /// <returns>true if the source string contains the specified substring; otherwise, false.</returns>
     public static bool Contains(this string source, string toCheck, StringComparison comp)
     {
-        return source?.IndexOf(toCheck, comp) >= 0;
+        return source.Contains(toCheck, comp);
     }
 
     /// <summary>
@@ -204,6 +204,6 @@ public static partial class StringHelper
         return secureString;
     }
 
-    [GeneratedRegex("(?<=[a-z])([A-Z])", RegexOptions.Compiled)]
+    [GeneratedRegex("(?<=[a-z])([A-Z])", RegexOptions.ExplicitCapture,1000)]
     private static partial Regex WordifyRegex();
 }

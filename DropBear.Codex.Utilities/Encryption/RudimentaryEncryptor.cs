@@ -6,13 +6,13 @@ namespace DropBear.Codex.Utilities.Encryption;
 
 public static class RudimentaryEncryptor
 {
-    private static int? _key;
+    private static int? s_key;
 
     public static string? Ulid
     {
         set
         {
-            if (!string.IsNullOrEmpty(value)) _key = ConvertUlidToIntSeed(value);
+            if (!string.IsNullOrEmpty(value)) s_key = ConvertUlidToIntSeed(value);
         }
     }
 
@@ -24,8 +24,7 @@ public static class RudimentaryEncryptor
     /// <returns>An integer seed derived from the cryptographic hash of the ULID.</returns>
     private static int ConvertUlidToIntSeed(string ulid)
     {
-        using var sha256 = SHA256.Create();
-        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(ulid));
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(ulid));
 
         // Condense the SHA-256 hash into an int by taking the first 4 bytes
         // Note: This is a simple approach; other methods might involve using more bytes for the seed or different reduction strategies
@@ -42,9 +41,8 @@ public static class RudimentaryEncryptor
     /// <returns>A hexadecimal string representing the SHA-256 hash of the data.</returns>
     private static string GenerateHash(string data)
     {
-        using var sha256 = SHA256.Create();
-        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(data));
-        var hash = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(data));
+        var hash = BitConverter.ToString(hashBytes).Replace("-", string.Empty, StringComparison.Ordinal);
         return hash;
     }
 
@@ -57,7 +55,7 @@ public static class RudimentaryEncryptor
     public static string Encode(string value)
     {
         // Check if the key has been set; if not, throw an exception
-        if (_key == null) throw new InvalidOperationException("Encryption key has not been set.");
+        if (s_key is null) throw new InvalidOperationException("Encryption key has not been set.");
 
 
         // Step 1: Convert the input string to its binary representation.
@@ -71,12 +69,12 @@ public static class RudimentaryEncryptor
         var binaryWithHash = binary + hashBinary;
 
         // Step 4: Generate a pseudo-random sequence based on the key for obfuscation.
-        var pseudoRandomSequence = GeneratePseudoRandomSequence(binaryWithHash.Length, _key);
+        var pseudoRandomSequence = GeneratePseudoRandomSequence(binaryWithHash.Length);
 
         // Step 5: Apply complex obfuscation logic to the binary data, including the hash.
         var obfuscatedBinary = new StringBuilder();
         for (var i = 0; i < binaryWithHash.Length; i++)
-            if (pseudoRandomSequence[i] % 2 == 0)
+            if (pseudoRandomSequence[i] % 2 is 0)
                 obfuscatedBinary.Append(binaryWithHash[i] == '0' ? '1' : '0');
             else
                 obfuscatedBinary.Insert(0, binaryWithHash[i]);
@@ -96,15 +94,15 @@ public static class RudimentaryEncryptor
     public static string Decode(string obfuscatedValue)
     {
         // Check if the key has been set; if not, throw an exception
-        if (_key == null) throw new InvalidOperationException("Decryption key has not been set.");
+        if (s_key is null) throw new InvalidOperationException("Decryption key has not been set.");
 
 
         var binary = BinaryAndHexConverter.HexToBinary(obfuscatedValue);
-        var deobfuscatedBinary = ReverseObfuscationLogic(binary, _key);
+        var deobfuscatedBinary = ReverseObfuscationLogic(binary);
 
         // Assuming the hash is the last 256 bits (SHA-256 hash size) of the binary string
-        var originalBinary = deobfuscatedBinary.Substring(0, deobfuscatedBinary.Length - 256);
-        var hashBinary = deobfuscatedBinary.Substring(deobfuscatedBinary.Length - 256);
+        var originalBinary = deobfuscatedBinary[..^256];
+        var hashBinary = deobfuscatedBinary[^256..];
         var originalValue = BinaryAndHexConverter.BinaryToString(originalBinary);
         var hash = BinaryAndHexConverter.BinaryToString(hashBinary);
 
@@ -119,16 +117,21 @@ public static class RudimentaryEncryptor
     ///     This sequence is used to apply variable obfuscation patterns to the binary data.
     /// </summary>
     /// <param name="length">The desired length of the sequence.</param>
-    /// <param name="key">A key that seeds the pseudo-random number generator to ensure reproducibility.</param>
     /// <returns>An array of integers representing the pseudo-random sequence.</returns>
-    private static int[] GeneratePseudoRandomSequence(int length, int? key)
+    private static int[] GeneratePseudoRandomSequence(int length)
     {
         // Check if the key has been set; if not, throw an exception
-        if (key == null) throw new InvalidOperationException("Encryption/Decryption key has not been set.");
 
         var sequence = new int[length];
-        var random = new Random((int)key);
-        for (var i = 0; i < length; i++) sequence[i] = random.Next();
+        // RNGCryptoServiceProvider does not use a seed like System.Random, so the key parameter will not be used here.
+        using var rng = RandomNumberGenerator.Create();
+        var randomNumber = new byte[4]; // 4 bytes for each int
+        for (var i = 0; i < length; i++)
+        {
+            rng.GetBytes(randomNumber);
+            sequence[i] = BitConverter.ToInt32(randomNumber, 0);
+        }
+
         return sequence;
     }
 
@@ -156,18 +159,17 @@ public static class RudimentaryEncryptor
     ///     Reverses the obfuscation logic applied during encoding to retrieve the original binary string.
     /// </summary>
     /// <param name="binary">The obfuscated binary string.</param>
-    /// <param name="key">The key used for pseudo-random sequence generation during encoding.</param>
     /// <returns>The original binary string before obfuscation.</returns>
-    private static string ReverseObfuscationLogic(string binary, int? key)
+    private static string ReverseObfuscationLogic(string binary)
     {
-        var pseudoRandomSequence = GeneratePseudoRandomSequence(binary.Length, key);
+        var pseudoRandomSequence = GeneratePseudoRandomSequence(binary.Length);
         var preMixedReversalBinary = ReverseMixedReversalPatterns(binary, pseudoRandomSequence);
 
         var originalBinary = new StringBuilder();
         for (var i = preMixedReversalBinary.Length - 1; i >= 0; i--)
         {
             var bit = preMixedReversalBinary[i];
-            originalBinary.Append(pseudoRandomSequence[preMixedReversalBinary.Length - 1 - i] % 2 == 0
+            originalBinary.Append(pseudoRandomSequence[preMixedReversalBinary.Length - 1 - i] % 2 is 0
                 ? bit == '0' ? '1' : '0'
                 : bit);
         }
@@ -185,7 +187,7 @@ public static class RudimentaryEncryptor
     {
         var result = new StringBuilder(binary);
         for (var i = binary.Length - 1; i >= 0; i--)
-            if (pseudoRandomSequence[i] % 2 == 0)
+            if (pseudoRandomSequence[i] % 2 is 0)
             {
                 var segmentLength = Math.Min(4, binary.Length - i);
                 var segmentStartIndex = Math.Max(0, i - segmentLength + 1);

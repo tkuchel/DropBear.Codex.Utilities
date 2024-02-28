@@ -19,7 +19,7 @@ public static class EnumHelper
         var fieldInfo = type.GetField(value.ToString());
 
         if (fieldInfo == null) return value.ToString();
-        var attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+        var attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), inherit: false);
 
         return attributes.Length > 0 ? attributes[0].Description : value.ToString();
     }
@@ -30,12 +30,12 @@ public static class EnumHelper
     /// <typeparam name="TAttribute">The type of the attribute to retrieve.</typeparam>
     /// <param name="value">The enum value to retrieve the attribute for.</param>
     /// <returns>The custom attribute if found; otherwise, null.</returns>
-    public static TAttribute GetCustomAttributeValue<TAttribute>(Enum value) where TAttribute : Attribute
+    public static TAttribute? GetCustomAttributeValue<TAttribute>(Enum value) where TAttribute : Attribute
     {
         var type = value.GetType();
         var name = Enum.GetName(type, value);
 
-        return type.GetField(name)?.GetCustomAttributes(false).OfType<TAttribute>().SingleOrDefault();
+        return name is not null ? type.GetField(name)?.GetCustomAttributes(inherit: false).OfType<TAttribute>().SingleOrDefault() : null;
     }
 
     /// <summary>

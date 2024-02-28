@@ -13,10 +13,7 @@ public static class PersonHelper
     /// <returns>The formatted name, combining family name and given names.</returns>
     public static string FormatName(string familyName, string givenNames)
     {
-        if (string.IsNullOrWhiteSpace(familyName))
-            return givenNames?.Trim() ?? string.Empty;
-
-        return $"{familyName.Trim()}, {givenNames?.Trim()}".TrimEnd(',');
+        return string.IsNullOrWhiteSpace(familyName) ? givenNames.Trim() : $"{familyName.Trim()}, {givenNames.Trim()}".TrimEnd(',');
     }
 
     /// <summary>

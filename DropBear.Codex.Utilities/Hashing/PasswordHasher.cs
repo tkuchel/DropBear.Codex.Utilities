@@ -78,12 +78,11 @@ public class PasswordHasher : IPasswordHasher
         };
     }
 
-    private byte[] GenerateRandomSalt()
+    private static byte[] GenerateRandomSalt()
     {
         var buffer = new byte[SaltSize];
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(buffer);
-
         return buffer;
     }
 

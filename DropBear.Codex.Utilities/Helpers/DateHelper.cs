@@ -1,4 +1,6 @@
-﻿namespace DropBear.Codex.Utilities.Helpers;
+﻿using System.Globalization;
+
+namespace DropBear.Codex.Utilities.Helpers;
 
 /// <summary>
 ///     Offers utility methods for date manipulation and formatting.
@@ -8,7 +10,7 @@ public static class DateHelper
     /// <summary>
     ///     Standard date format used across the application.
     /// </summary>
-    public const string StandardDateFormat = "dd/MM/yyyy";
+    private const string StandardDateFormat = "dd/MM/yyyy";
 
     /// <summary>
     ///     Standard time format used across the application.
@@ -18,7 +20,7 @@ public static class DateHelper
     /// <summary>
     ///     Standard datetime format used across the application.
     /// </summary>
-    public const string StandardDateTimeFormat = "dd/MM/yyyy HH:mm:ss";
+    private const string StandardDateTimeFormat = "dd/MM/yyyy HH:mm:ss";
 
     /// <summary>
     ///     Formats a <see cref="DateTime" /> according to whether it includes a time part.
@@ -31,7 +33,7 @@ public static class DateHelper
         string dateFormat = StandardDateFormat,
         string dateTimeFormat = StandardDateTimeFormat)
     {
-        return dateTime.ToString(dateTime.Date == dateTime ? dateFormat : dateTimeFormat);
+        return dateTime.ToString(dateTime.Date == dateTime ? dateFormat : dateTimeFormat, CultureInfo.CurrentCulture);
     }
 
     /// <summary>
