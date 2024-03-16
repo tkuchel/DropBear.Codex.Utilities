@@ -11,7 +11,7 @@ namespace DropBear.Codex.Utilities.Hashing;
 /// <summary>
 ///     Implements password hashing and verification using Argon2id with enhanced security and configurability.
 /// </summary>
-public class PasswordHasher : IPasswordHasher
+public class ArgonPasswordHasher : IPasswordHasher
 {
     private const int SaltSize = 32; // Increased size in bytes for the salt for enhanced security.
     private const int HashSize = 16; // Size in bytes for the hash.
