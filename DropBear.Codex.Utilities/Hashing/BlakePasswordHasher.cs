@@ -11,9 +11,9 @@ using DropBear.Codex.Utilities.Hashing.Models;
 namespace DropBear.Codex.Utilities.Hashing;
 
 /// <summary>
-///     Implements password hashing and verification using Blake2b with enhanced security and configurability.
+///     Implements data hashing and verification using Blake2b with enhanced security and configurability.
 /// </summary>
-public class BlakePasswordHasher : IPasswordHasher
+public class BlakePasswordHasher : IDataHasher
 {
     private const int SaltSize = 32; // Size in bytes for the salt for enhanced security.
     private const int HashSize = 32; // Adjusting hash size for Blake2b
@@ -24,7 +24,7 @@ public class BlakePasswordHasher : IPasswordHasher
     /// </summary>
     /// <param name="data">The data to encode.</param>
     /// <returns>A Result containing the Base64 encoded hash.</returns>
-    public Result<string> EncodeToBase64(byte[] data)
+    public Result<string> Base64EncodedHash(byte[] data)
     {
         try
         {
@@ -51,7 +51,9 @@ public class BlakePasswordHasher : IPasswordHasher
             var hash = Blake2b.ComputeHash(HashSize, data);
             var base64Hash = Convert.ToBase64String(hash);
 
-            return base64Hash == expectedBase64Hash ? Result.Success() : Result.Failure("Calculated hash does not match the expected hash.");
+            return base64Hash == expectedBase64Hash
+                ? Result.Success()
+                : Result.Failure("Calculated hash does not match the expected hash.");
         }
         catch (Exception ex)
         {

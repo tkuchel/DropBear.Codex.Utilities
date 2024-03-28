@@ -4,9 +4,9 @@ using DropBear.Codex.Utilities.Hashing.Models;
 namespace DropBear.Codex.Utilities.Hashing.Interfaces;
 
 /// <summary>
-///     Defines the contract for a service that provides password hashing and verification.
+///     Defines the contract for a service that provides hashing and verification.
 /// </summary>
-public interface IPasswordHasher
+public interface IDataHasher
 {
     /// <summary>
     ///     Hashes a plain text password and returns the hashed password along with any relevant metadata.
@@ -34,7 +34,7 @@ public interface IPasswordHasher
     /// </summary>
     /// <param name="data">The data to encode.</param>
     /// <returns>A Result containing the Base64 encoded hash.</returns>
-    Result<string> EncodeToBase64(byte[] data);
+    Result<string> Base64EncodedHash(byte[] data);
 
     /// <summary>
     /// Verifies if the calculated hash of the provided data matches the expected hash.

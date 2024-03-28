@@ -12,8 +12,8 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The <see cref="IServiceCollection" /> to add the services to.</param>
     public static void AddHashingUtilities(this IServiceCollection services)
     {
-        services.AddTransient<IPasswordHasher, BlakePasswordHasher>();
-        services.AddTransient<IPasswordHasher, ArgonPasswordHasher>();
+        services.AddTransient<IDataHasher, BlakePasswordHasher>();
+        services.AddTransient<IDataHasher, ArgonPasswordHasher>();
     }
     
 }

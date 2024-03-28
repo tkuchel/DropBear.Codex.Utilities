@@ -9,9 +9,9 @@ using Konscious.Security.Cryptography;
 namespace DropBear.Codex.Utilities.Hashing;
 
 /// <summary>
-///     Implements password hashing and verification using Argon2id with enhanced security and configurability.
+///     Implements data hashing and verification using Argon2id with enhanced security and configurability.
 /// </summary>
-public class ArgonPasswordHasher : IPasswordHasher
+public class ArgonPasswordHasher : IDataHasher
 {
     private const int SaltSize = 32; // Increased size in bytes for the salt for enhanced security.
     private const int HashSize = 16; // Size in bytes for the hash.
@@ -72,7 +72,7 @@ public class ArgonPasswordHasher : IPasswordHasher
     /// </summary>
     /// <param name="data">The data to encode.</param>
     /// <returns>A <see cref="Result{String}" /> containing the Base64 encoded hash.</returns>
-    public Result<string> EncodeToBase64(byte[] data)
+    public Result<string> Base64EncodedHash(byte[] data)
     {
         var salt = GenerateRandomSalt();
         using var argon2 = CreateArgon2(Encoding.UTF8.GetString(data), salt);
