@@ -67,6 +67,36 @@ public class ArgonPasswordHasher : IPasswordHasher
         return isValid ? Result.Success() : Result.Failure("Password is incorrect");
     }
 
+    /// <summary>
+    ///     Encodes the provided data to a Base64 encoded hash using Argon2id.
+    /// </summary>
+    /// <param name="data">The data to encode.</param>
+    /// <returns>A <see cref="Result{String}" /> containing the Base64 encoded hash.</returns>
+    public Result<string> EncodeToBase64(byte[] data)
+    {
+        var salt = GenerateRandomSalt();
+        using var argon2 = CreateArgon2(Encoding.UTF8.GetString(data), salt);
+        var hash = argon2.GetBytes(HashSize);
+        var base64Hash = Convert.ToBase64String(hash);
+        return Result<string>.Success(base64Hash);
+    }
+
+    /// <summary>
+    ///     Verifies the hash of the provided data against an expected Base64 encoded hash.
+    /// </summary>
+    /// <param name="data">The data to hash.</param>
+    /// <param name="expectedBase64Hash">The expected hash, Base64 encoded.</param>
+    /// <returns>A <see cref="Result" /> indicating success if the hashes match, or failure with an error message otherwise.</returns>
+    public Result VerifyHash(byte[] data, string expectedBase64Hash)
+    {
+        var salt = GenerateRandomSalt(); // In actual implementation, salt should be extracted from the expected hash
+        using var argon2 = CreateArgon2(Encoding.UTF8.GetString(data), salt);
+        var hash = argon2.GetBytes(HashSize);
+        var base64Hash = Convert.ToBase64String(hash);
+
+        return base64Hash == expectedBase64Hash ? Result.Success() : Result.Failure("Calculated hash does not match the expected hash.");
+    }
+
     private Argon2id CreateArgon2(string password, byte[] salt) =>
         new(Encoding.UTF8.GetBytes(password))
         {

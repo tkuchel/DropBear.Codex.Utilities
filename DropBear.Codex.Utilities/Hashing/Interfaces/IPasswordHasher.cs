@@ -28,4 +28,19 @@ public interface IPasswordHasher
     ///     is successful, the result is successful; otherwise, it contains details of the failure.
     /// </returns>
     Result VerifyPassword(string password, string expectedCombinedHash);
+    
+    /// <summary>
+    /// Encodes data to a Base64 encoded hash.
+    /// </summary>
+    /// <param name="data">The data to encode.</param>
+    /// <returns>A Result containing the Base64 encoded hash.</returns>
+    Result<string> EncodeToBase64(byte[] data);
+
+    /// <summary>
+    /// Verifies if the calculated hash of the provided data matches the expected hash.
+    /// </summary>
+    /// <param name="data">The data to hash.</param>
+    /// <param name="expectedBase64Hash">The expected hash, Base64 encoded.</param>
+    /// <returns>A Result indicating success if hashes match, or failure otherwise.</returns>
+    Result VerifyHash(byte[] data, string expectedBase64Hash);
 }
