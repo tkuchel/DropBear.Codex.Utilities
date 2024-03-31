@@ -44,5 +44,17 @@ public static class HashingHelper
         Buffer.BlockCopy(combinedBytes, saltSize, hash, 0, hash.Length);
         return (salt, hash);
     }
+    
+    // Convert byte array to string
+    public static string ConvertByteArrayToBase64String(byte[] byteArray)
+    {
+        return Convert.ToBase64String(byteArray);
+    }
+
+    // Convert string to byte array
+    public static byte[] ConvertBase64StringToByteArray(string str)
+    {
+        return Convert.FromBase64String(str);
+    }
 }
 
