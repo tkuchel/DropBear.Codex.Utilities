@@ -6,36 +6,72 @@ public class DynamicFlagManager : IDynamicFlagManager
     private int _flags;
     private int _nextFreeBit;
 
-    public void AddFlag(string featureName)
+    // Overload for adding flags by enum
+    public void AddFlag<TEnum>(TEnum flag) where TEnum : Enum
     {
-        if (_flagMap.ContainsKey(featureName) || _nextFreeBit >= 32) return;
-        _flagMap[featureName] = 1 << _nextFreeBit;
+        AddFlag(flag.ToString());
+    }
+
+    public void AddFlag(string flagName)
+    {
+        if (_flagMap.ContainsKey(flagName) || _nextFreeBit >= 32) return;
+        _flagMap[flagName] = 1 << _nextFreeBit;
         _nextFreeBit++;
     }
 
-    public void RemoveFlag(string featureName)
+    // Overload for removing flags by enum
+    public void RemoveFlag<TEnum>(TEnum flag) where TEnum : Enum
     {
-        if (!_flagMap.TryGetValue(featureName, out var bitValue)) return;
+        RemoveFlag(flag.ToString());
+    }
+
+    public void RemoveFlag(string flagName)
+    {
+        if (!_flagMap.TryGetValue(flagName, out var bitValue)) return;
         _flags &= ~bitValue; // Clear the flag if it's set
-        _flagMap.Remove(featureName);
+        _flagMap.Remove(flagName);
         // Note: This does not reorganize the bit positions
     }
 
-    public void SetFlag(string featureName)
+    // Overload for setting flags by enum
+    public void SetFlag<TEnum>(TEnum flag) where TEnum : Enum
     {
-        if (_flagMap.TryGetValue(featureName, out var bitValue)) _flags |= bitValue;
+        SetFlag(flag.ToString());
     }
 
-    public void ClearFlag(string featureName)
+    public void SetFlag(string flagName)
     {
-        if (_flagMap.TryGetValue(featureName, out var bitValue)) _flags &= ~bitValue;
+        if (_flagMap.TryGetValue(flagName, out var bitValue)) _flags |= bitValue;
     }
 
-    public void ToggleFlag(string featureName)
+    // Overload for clearing flags by enum
+    public void ClearFlag<TEnum>(TEnum flag) where TEnum : Enum
     {
-        if (_flagMap.TryGetValue(featureName, out var bitValue)) _flags ^= bitValue;
+        ClearFlag(flag.ToString());
     }
 
-    public bool IsFlagSet(string featureName) =>
-        _flagMap.TryGetValue(featureName, out var bitValue) && (_flags & bitValue) == bitValue;
+    public void ClearFlag(string flagName)
+    {
+        if (_flagMap.TryGetValue(flagName, out var bitValue)) _flags &= ~bitValue;
+    }
+
+    // Overload for toggling flags by enum
+    public void ToggleFlag<TEnum>(TEnum flag) where TEnum : Enum
+    {
+        ToggleFlag(flag.ToString());
+    }
+
+    public void ToggleFlag(string flagName)
+    {
+        if (_flagMap.TryGetValue(flagName, out var bitValue)) _flags ^= bitValue;
+    }
+
+    // Overload for checking if a flag is set by enum
+    public bool IsFlagSet<TEnum>(TEnum flag) where TEnum : Enum
+    {
+        return IsFlagSet(flag.ToString());
+    }
+
+    public bool IsFlagSet(string flagName) =>
+        _flagMap.TryGetValue(flagName, out var bitValue) && (_flags & bitValue) == bitValue;
 }
