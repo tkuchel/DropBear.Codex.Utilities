@@ -9,13 +9,13 @@ public interface IDynamicFlagManager
     ///     Adds a new feature flag with a unique name to the manager.
     /// </summary>
     /// <param name="featureName">The name of the feature to add.</param>
-    void AddFeature(string featureName);
+    void AddFlag(string featureName);
 
     /// <summary>
     ///     Removes an existing feature flag by name from the manager.
     /// </summary>
     /// <param name="featureName">The name of the feature to remove.</param>
-    void RemoveFeature(string featureName);
+    void RemoveFlag(string featureName);
 
     /// <summary>
     ///     Sets a feature flag to the 'on' state.
