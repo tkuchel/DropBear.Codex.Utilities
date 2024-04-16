@@ -113,4 +113,48 @@ public static class DateHelper
     {
         return (long)(dateTime.ToUniversalTime() - new DateTime(1970, 1, 1)).TotalSeconds;
     }
+    
+    /// <summary>
+    /// Determines whether the given date of birth indicates that the person is under 18 years of age.
+    /// </summary>
+    /// <param name="dateOfBirth">The date of birth of the person.</param>
+    /// <returns>
+    /// <c>true</c> if the person is under 18 years of age based on the provided date of birth; otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// <para>The method calculates the age based on the current date and time. If the date of birth is null, the method returns false.</para>
+    /// <para>The age calculation considers the date of birth and the current date, but does not take into account the time component. This means that if the person turns 18 later in the day, they will still be considered under 18 until the next day.</para>
+    /// <para>The method uses the <see cref="DateTimeOffset"/> struct to handle time zone offsets correctly. If the time zone is not relevant in your use case, you can use the <see cref="DateTime"/> struct instead.</para>
+    /// </remarks>
+    public static bool IsUnder18(DateTimeOffset? dateOfBirth)
+    {
+        if (dateOfBirth == null)
+            return false;
+
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        return dateOfBirth > now.AddYears(-18);
+    }
+    
+    /// <summary>
+    /// Determines whether the given date of birth indicates that the person is under the specified age limit.
+    /// </summary>
+    /// <param name="dateOfBirth">The date of birth of the person.</param>
+    /// <param name="ageLimit">The age limit to check against.</param>
+    /// <returns>
+    /// <c>true</c> if the person is under the specified age limit based on the provided date of birth; otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// <para>The method calculates the age based on the current date and time. If the date of birth is null, the method returns false.</para>
+    /// <para>The age calculation considers the date of birth and the current date, but does not take into account the time component. This means that if the person reaches the age limit later in the day, they will still be considered under the age limit until the next day.</para>
+    /// <para>The method uses the <see cref="DateTimeOffset"/> struct to handle time zone offsets correctly. If the time zone is not relevant in your use case, you can use the <see cref="DateTime"/> struct instead.</para>
+    /// <para>If the specified age limit is negative, the method will return false.</para>
+    /// </remarks>
+    public static bool IsUnderAgeLimit(DateTimeOffset? dateOfBirth, int ageLimit)
+    {
+        if (dateOfBirth == null || ageLimit < 0)
+            return false;
+
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        return dateOfBirth > now.AddYears(-ageLimit);
+    }
 }
