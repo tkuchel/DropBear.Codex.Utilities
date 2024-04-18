@@ -1,78 +1,70 @@
 ﻿using System.Text;
-using DropBear.Codex.Core.ReturnTypes;
+using DropBear.Codex.Core;
 using DropBear.Codex.Utilities.Hashing.Interfaces;
 using HashDepot;
 
 namespace DropBear.Codex.Utilities.Hashing;
 
-/// <summary>
-///     Service for hashing and verifying data using the XXHash algorithm.
-/// </summary>
 public class XxHashingService : IHashingService
 {
-    /// <summary>
-    ///     Computes the XXHash hash of the input string.
-    /// </summary>
-    /// <param name="input">The input string to hash.</param>
-    /// <returns>A Result containing the hashed value.</returns>
+    private ulong _seed; // Allows setting a custom seed if needed, default is 0.
+
+    public IHashingService WithSalt(byte[] salt) =>
+        // XXHash does not use salt, so this method is effectively a noop.
+        this;
+
+    public IHashingService WithIterations(int iterations) =>
+        // XXHash does not use iterations, so this method is effectively a noop.
+        this;
+
     public Result<string> Hash(string input)
     {
-        // Validates input to ensure it's not null or empty.
         if (string.IsNullOrEmpty(input))
             return Result<string>.Failure("Input cannot be null or empty.");
 
         var buffer = Encoding.UTF8.GetBytes(input);
-        var hash = XXHash.Hash64(buffer); // Default seed is used here.
-        return Result<string>.Success(hash.ToString("x8")); // Returns hash in hexadecimal format.
+        var hash = XXHash.Hash64(buffer, _seed); // Uses the custom seed if set.
+        return Result<string>.Success(hash.ToString("x8"));
     }
 
-    /// <summary>
-    ///     Verifies whether the input string matches the expected hashed value.
-    /// </summary>
-    /// <param name="input">The input string to verify.</param>
-    /// <param name="expectedHash">The expected hashed value to compare against.</param>
-    /// <returns>A Result indicating success or failure of the verification.</returns>
     public Result Verify(string input, string expectedHash)
     {
-        // Utilizes the Hash method to calculate the hash of the input and compares it to the expected hash.
         var hashResult = Hash(input);
         if (!hashResult.IsSuccess)
-            return Result.Success();
+            return Result.Failure("Failed to compute hash.");
 
         return hashResult.Value == expectedHash ? Result.Success() : Result.Failure("Verification failed.");
     }
 
-    /// <summary>
-    ///     Computes the XXHash hash of the input data and encodes it to Base64.
-    /// </summary>
-    /// <param name="data">The input data to hash.</param>
-    /// <returns>A Result containing the Base64 encoded hashed value.</returns>
     public Result<string> EncodeToBase64Hash(byte[] data)
     {
-        // Checks for null data to ensure robust error handling.
         if (data.Length is 0)
             return Result<string>.Failure("Data cannot be null or empty.");
 
-        var hash = XXHash.Hash64(data); // Hashes the data using XXHash.
-        var base64EncodedHash = Convert.ToBase64String(BitConverter.GetBytes(hash)); // Converts the hash to Base64.
-        return Result<string>.Success(base64EncodedHash);
+        var hash = XXHash.Hash64(data, _seed); // Uses the custom seed.
+        var hashBytes = BitConverter.GetBytes(hash);
+        var base64Hash = Convert.ToBase64String(hashBytes);
+        return Result<string>.Success(base64Hash);
     }
 
-    /// <summary>
-    ///     Verifies whether the Base64 encoded hash matches the hashed value of the input data.
-    /// </summary>
-    /// <param name="data">The input data to verify.</param>
-    /// <param name="expectedBase64Hash">The expected Base64 encoded hash.</param>
-    /// <returns>A Result indicating success or failure of the verification.</returns>
     public Result VerifyBase64Hash(byte[] data, string expectedBase64Hash)
     {
-        // Similar to EncodeToBase64Hash but with verification against an expected Base64 encoded hash.
-        var hashResult = EncodeToBase64Hash(data);
-        if (!hashResult.IsSuccess)
-            return Result.Success(); // Propagates failure if hashing or encoding failed.
+        var encodeResult = EncodeToBase64Hash(data);
+        if (!encodeResult.IsSuccess)
+            return Result.Failure("Failed to compute hash.");
 
-        return hashResult.Value == expectedBase64Hash
+        return encodeResult.Value == expectedBase64Hash
             ? Result.Success()
             : Result.Failure("Base64 hash verification failed.");
+    }
+
+    public IHashingService WithHashSize(int size) =>
+        // XXHash output size is determined by the algorithm (32-bit or 64-bit), so this method is effectively a noop.
+        this;
+
+    public IHashingService WithSeed(ulong seed)
+    {
+        _seed = seed;
+        return this;
     }
 }

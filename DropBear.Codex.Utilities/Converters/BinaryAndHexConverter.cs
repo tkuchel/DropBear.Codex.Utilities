@@ -53,13 +53,9 @@ public static class BinaryAndHexConverter
     /// </summary>
     /// <param name="value">The string to convert.</param>
     /// <returns>The binary representation of the input string.</returns>
-    public static string StringToBinary(string value)
-    {
-        if (string.IsNullOrEmpty(value)) return string.Empty;
-
-        return string.Join(string.Empty,
-            Encoding.UTF8.GetBytes(value).Select(b => Convert.ToString(b, 2).PadLeft(8, '0')));
-    }
+    public static string StringToBinary(string value) => string.IsNullOrEmpty(value)
+        ? string.Empty
+        : string.Concat(Encoding.UTF8.GetBytes(value).Select(b => Convert.ToString(b, 2).PadLeft(8, '0')));
 
     /// <summary>
     ///     Converts a binary string to its original string representation.
@@ -72,11 +68,9 @@ public static class BinaryAndHexConverter
         if (string.IsNullOrEmpty(value) || value.Length % 8 is not 0)
             throw new ArgumentException("Binary string is not valid.", nameof(value));
 
-        var bytes = Enumerable.Range(0, value.Length / 8)
+        return Encoding.UTF8.GetString(Enumerable.Range(0, value.Length / 8)
             .Select(i => Convert.ToByte(value.Substring(i * 8, 8), 2))
-            .ToArray();
-
-        return Encoding.UTF8.GetString(bytes);
+            .ToArray());
     }
 
     /// <summary>
@@ -86,14 +80,10 @@ public static class BinaryAndHexConverter
     {
         if (string.IsNullOrEmpty(value)) return string.Empty;
 
-        var hex = new StringBuilder();
-        for (var i = 0; i < value.Length; i += 4)
-        {
-            var nibble = value.Substring(i, 4);
-            hex.Append(BinaryToHexTable[nibble]);
-        }
+        var hex = new StringBuilder(value.Length / 4);
+        for (var i = 0; i < value.Length; i += 4) hex.Append(BinaryToHexTable[value.Substring(i, 4)]);
 
-        return hex.ToString().ToUpper(CultureInfo.CurrentCulture);
+        return hex.ToString().ToUpper(CultureInfo.InvariantCulture);
     }
 
     /// <summary>
@@ -103,8 +93,8 @@ public static class BinaryAndHexConverter
     {
         if (string.IsNullOrEmpty(value)) return string.Empty;
 
-        var binary = new StringBuilder();
-        foreach (var c in value.ToLower(CultureInfo.CurrentCulture)) binary.Append(HexToBinaryTable[c.ToString()]);
+        var binary = new StringBuilder(value.Length * 4);
+        foreach (var c in value.ToUpperInvariant()) binary.Append(HexToBinaryTable[c.ToString()]);
 
         return binary.ToString();
     }
@@ -114,26 +104,17 @@ public static class BinaryAndHexConverter
     /// </summary>
     /// <param name="value">The string to convert.</param>
     /// <returns>A byte array representing the binary data of the string.</returns>
-    public static byte[] StringToBinaryBytes(string value)
-    {
-        if (string.IsNullOrEmpty(value)) return Array.Empty<byte>();
-
-        var bytes = Encoding.UTF8.GetBytes(value);
-        return bytes; // Directly return the byte array without conversion
-    }
+    public static byte[] StringToBinaryBytes(string value) =>
+        string.IsNullOrEmpty(value) ? [] : Encoding.UTF8.GetBytes(value);
 
     /// <summary>
     ///     Converts a binary byte array back to its string representation.
     /// </summary>
     /// <param name="value">The binary byte array to convert.</param>
     /// <returns>The string representation of the binary data.</returns>
-    public static string BinaryBytesToString(byte[]? value)
-    {
-        if (value is null || value.Length is 0) return string.Empty;
+    public static string BinaryBytesToString(byte[]? value) =>
+        value is null || value.Length is 0 ? string.Empty : Encoding.UTF8.GetString(value);
 
-        var result = Encoding.UTF8.GetString(value);
-        return result;
-    }
 
     /// <summary>
     ///     Converts a string to a hexadecimal byte array.
@@ -142,15 +123,17 @@ public static class BinaryAndHexConverter
     /// <returns>A byte array representing the hexadecimal data of the string.</returns>
     public static byte[] StringToHexBytes(string value)
     {
-        if (string.IsNullOrEmpty(value)) return Array.Empty<byte>();
+        if (string.IsNullOrEmpty(value)) return [];
 
-        var hexStringBuilder = new StringBuilder();
-        foreach (var b in Encoding.UTF8.GetBytes(value)) hexStringBuilder.Append(b.ToString("x2"));
+        // Convert the string to bytes, then to a hexadecimal string.
+        var hex = BitConverter.ToString(Encoding.UTF8.GetBytes(value)).Replace("-", "", StringComparison.OrdinalIgnoreCase).ToUpperInvariant();
 
-        return Enumerable.Range(0, hexStringBuilder.Length / 2)
-            .Select(i => Convert.ToByte(hexStringBuilder.ToString().Substring(i * 2, 2), 16))
+        // Convert the hexadecimal string to a byte array.
+        return Enumerable.Range(0, hex.Length / 2)
+            .Select(i => Convert.ToByte(hex.Substring(i * 2, 2), 16))
             .ToArray();
     }
+
 
     /// <summary>
     ///     Converts a hexadecimal byte array back to its string representation.
@@ -161,10 +144,7 @@ public static class BinaryAndHexConverter
     {
         if (value is null || value.Length is 0) return string.Empty;
 
-        var stringBuilder = new StringBuilder();
-        foreach (var b in value) stringBuilder.Append(Convert.ToString(b, 16).PadLeft(2, '0'));
-
-        return stringBuilder.ToString();
+        return BitConverter.ToString(value).Replace("-", "", StringComparison.OrdinalIgnoreCase).ToUpperInvariant();
     }
 
     /// <summary>
@@ -175,13 +155,15 @@ public static class BinaryAndHexConverter
     /// <exception cref="ArgumentException">Thrown if the hex string is null, empty, or has an odd length.</exception>
     public static byte[] HexToByteArray(string hex)
     {
-        if (string.IsNullOrEmpty(hex)) throw new ArgumentException("Hex string cannot be null or empty.", nameof(hex));
+        if (string.IsNullOrEmpty(hex))
+            throw new ArgumentException("Hex string cannot be null or empty.", nameof(hex));
 
-        if (hex.Length % 2 is not 0) throw new ArgumentException("Hex string must have an even length.", nameof(hex));
+        if (hex.Length % 2 is not 0)
+            throw new ArgumentException("Hex string must have an even length.", nameof(hex));
 
-        var bytes = new byte[hex.Length / 2];
-        for (var i = 0; i < hex.Length; i += 2) bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-        return bytes;
+        return Enumerable.Range(0, hex.Length / 2)
+            .Select(i => Convert.ToByte(hex.Substring(i * 2, 2), 16))
+            .ToArray();
     }
 
     /// <summary>
@@ -195,9 +177,7 @@ public static class BinaryAndHexConverter
         if (bytes is null || bytes.Length is 0)
             throw new ArgumentException("Byte array cannot be null or empty.", nameof(bytes));
 
-        var hex = new StringBuilder(bytes.Length * 2);
-        foreach (var b in bytes) hex.Append(CultureInfo.CurrentCulture, $"{b:x2}");
-        return hex.ToString();
+        return BitConverter.ToString(bytes).Replace("-", "", StringComparison.OrdinalIgnoreCase).ToUpperInvariant();
     }
 
     /// <summary>
@@ -239,8 +219,10 @@ public static class BinaryAndHexConverter
     /// <param name="binary2">The second binary string.</param>
     /// <returns>The result of the bitwise AND operation as a binary string.</returns>
     // ReSharper disable once InconsistentNaming
-    public static string BitwiseAND(string binary1, string binary2) => PerformBitwiseOperation(binary1, binary2,
-        (b1, b2) => (b1 & b2).ToString(CultureInfo.CurrentCulture));
+    public static string BitwiseAND(string binary1, string binary2) =>
+        PerformBitwiseOperation(binary1, binary2, (b1, b2) => (b1 & b2).ToString(CultureInfo.InvariantCulture));
+
+
 
     /// <summary>
     ///     Performs a bitwise OR operation on two binary strings.
@@ -249,8 +231,9 @@ public static class BinaryAndHexConverter
     /// <param name="binary2">The second binary string.</param>
     /// <returns>The result of the bitwise OR operation as a binary string.</returns>
     // ReSharper disable once InconsistentNaming
-    public static string BitwiseOR(string binary1, string binary2) => PerformBitwiseOperation(binary1, binary2,
-        (b1, b2) => (b1 | b2).ToString(CultureInfo.CurrentCulture));
+    public static string BitwiseOR(string binary1, string binary2) =>
+        PerformBitwiseOperation(binary1, binary2, (b1, b2) => (b1 | b2).ToString(CultureInfo.InvariantCulture));
+
 
     /// <summary>
     ///     Performs a bitwise XOR operation on two binary strings.
@@ -259,8 +242,9 @@ public static class BinaryAndHexConverter
     /// <param name="binary2">The second binary string.</param>
     /// <returns>The result of the bitwise XOR operation as a binary string.</returns>
     // ReSharper disable once InconsistentNaming
-    public static string BitwiseXOR(string binary1, string binary2) => PerformBitwiseOperation(binary1, binary2,
-        (b1, b2) => (b1 ^ b2).ToString(CultureInfo.CurrentCulture));
+    public static string BitwiseXOR(string binary1, string binary2) =>
+        PerformBitwiseOperation(binary1, binary2, (b1, b2) => (b1 ^ b2).ToString(CultureInfo.InvariantCulture));
+
 
     /// <summary>
     ///     Performs a bitwise NOT operation on a binary string.
@@ -268,7 +252,9 @@ public static class BinaryAndHexConverter
     /// <param name="binary">The binary string to negate.</param>
     /// <returns>The result of the bitwise NOT operation as a binary string.</returns>
     // ReSharper disable once InconsistentNaming
-    public static string BitwiseNOT(string binary) => string.Concat(binary.Select(b => b == '0' ? '1' : '0'));
+    public static string BitwiseNOT(string binary) =>
+        new(binary.Select(b => b == '0' ? '1' : '0').ToArray());
+
 
     /// <summary>
     ///     Shifts a binary string to the left by a specified number of bits.
@@ -296,15 +282,13 @@ public static class BinaryAndHexConverter
     /// <returns>The result of performing the bitwise operation on the binary strings.</returns>
     private static string PerformBitwiseOperation(string binary1, string binary2, Func<int, int, string> operation)
     {
-        // Ensure both binary strings are of equal length for bitwise operations
         var maxLength = Math.Max(binary1.Length, binary2.Length);
         binary1 = binary1.PadLeft(maxLength, '0');
         binary2 = binary2.PadLeft(maxLength, '0');
 
-        var result = new StringBuilder();
+        var result = new StringBuilder(maxLength);
         for (var i = 0; i < maxLength; i++)
         {
-            // Convert each character to a number (0 or 1) and apply the operation
             var bit1 = binary1[i] - '0';
             var bit2 = binary2[i] - '0';
             result.Append(operation(bit1, bit2));

@@ -1,12 +1,20 @@
 ﻿using System.Text;
 using Blake3;
-using DropBear.Codex.Core.ReturnTypes;
+using DropBear.Codex.Core;
 using DropBear.Codex.Utilities.Hashing.Interfaces;
 
 namespace DropBear.Codex.Utilities.Hashing;
 
 public class Blake3HashingService : IHashingService
 {
+    public IHashingService WithSalt(byte[] salt) =>
+        // Blake3 does not use salt, so this method is effectively a noop.
+        this;
+
+    public IHashingService WithIterations(int iterations) =>
+        // Blake3 does not use iterations, so this method is effectively a noop.
+        this;
+
     public Result<string> Hash(string input)
     {
         try
@@ -62,5 +70,7 @@ public class Blake3HashingService : IHashingService
         }
     }
 
-    // Additional functionalities like MAC generation and key derivation are not directly covered by IHashingService and would require expanding the interface or creating specific methods for those purposes.
+    public IHashingService WithHashSize(int size) =>
+        // Blake3 has a fixed output size but implementing to comply with interface.
+        this;
 }

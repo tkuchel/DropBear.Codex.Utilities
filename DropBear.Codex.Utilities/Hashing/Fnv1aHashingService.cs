@@ -1,20 +1,20 @@
 ﻿using System.Text;
-using DropBear.Codex.Core.ReturnTypes;
+using DropBear.Codex.Core;
 using DropBear.Codex.Utilities.Hashing.Interfaces;
 using HashDepot;
 
 namespace DropBear.Codex.Utilities.Hashing;
 
-/// <summary>
-///     Service for hashing and verifying data using FNV-1a algorithm.
-/// </summary>
 public class Fnv1AHashingService : IHashingService
 {
-    /// <summary>
-    ///     Computes the FNV-1a hash of the input string.
-    /// </summary>
-    /// <param name="input">The input string to hash.</param>
-    /// <returns>A Result containing the hashed value.</returns>
+    public IHashingService WithSalt(byte[] salt) =>
+        // FNV-1a does not use salt, so this method is effectively a noop.
+        this;
+
+    public IHashingService WithIterations(int iterations) =>
+        // FNV-1a does not use iterations, so this method is effectively a noop.
+        this;
+
     public Result<string> Hash(string input)
     {
         if (string.IsNullOrEmpty(input))
@@ -25,12 +25,6 @@ public class Fnv1AHashingService : IHashingService
         return Result<string>.Success(hash.ToString("x8"));
     }
 
-    /// <summary>
-    ///     Verifies whether the input string matches the expected hashed value.
-    /// </summary>
-    /// <param name="input">The input string to verify.</param>
-    /// <param name="expectedHash">The expected hashed value to compare against.</param>
-    /// <returns>A Result indicating success or failure of the verification.</returns>
     public Result Verify(string input, string expectedHash)
     {
         var hashResult = Hash(input);
@@ -41,11 +35,6 @@ public class Fnv1AHashingService : IHashingService
         return isValid ? Result.Success() : Result.Failure("Verification failed.");
     }
 
-    /// <summary>
-    ///     Computes the FNV-1a hash of the input data and encodes it to Base64.
-    /// </summary>
-    /// <param name="data">The input data to hash.</param>
-    /// <returns>A Result containing the Base64 encoded hashed value.</returns>
     public Result<string> EncodeToBase64Hash(byte[] data)
     {
         if (data.Length is 0)
@@ -64,12 +53,6 @@ public class Fnv1AHashingService : IHashingService
         }
     }
 
-    /// <summary>
-    ///     Verifies whether the Base64 encoded hash matches the hashed value of the input data.
-    /// </summary>
-    /// <param name="data">The input data to verify.</param>
-    /// <param name="expectedBase64Hash">The expected Base64 encoded hashed value.</param>
-    /// <returns>A Result indicating success or failure of the verification.</returns>
     public Result VerifyBase64Hash(byte[] data, string expectedBase64Hash)
     {
         var encodeResult = EncodeToBase64Hash(data);
@@ -79,4 +62,8 @@ public class Fnv1AHashingService : IHashingService
         var isValid = string.Equals(encodeResult.Value, expectedBase64Hash, StringComparison.Ordinal);
         return isValid ? Result.Success() : Result.Failure("Base64 hash verification failed.");
     }
+
+    public IHashingService WithHashSize(int size) =>
+        // FNV-1a output size is determined by the algorithm (32-bit or 64-bit), so this method is effectively a noop.
+        this;
 }

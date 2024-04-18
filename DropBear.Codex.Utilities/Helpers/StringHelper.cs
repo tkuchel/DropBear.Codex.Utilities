@@ -35,6 +35,7 @@ public static partial class StringHelper
         var shouldCapitalize = true;
 
         foreach (var c in input)
+        {
             if (shouldCapitalize && char.IsLetter(c))
             {
                 result.Append(char.ToUpper(c, CultureInfo.InvariantCulture));
@@ -43,11 +44,14 @@ public static partial class StringHelper
             else
             {
                 result.Append(c);
-                shouldCapitalize = c is '.' or '!' or '?';
+                if (c is '.' or '!' or '?')
+                    shouldCapitalize = char.IsWhiteSpace(c) || result.Length == input.Length - 1;
             }
+        }
 
         return result.ToString();
     }
+
 
     /// <summary>
     ///     Parses a date string and extracts its components.

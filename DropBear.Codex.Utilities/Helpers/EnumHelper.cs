@@ -47,7 +47,17 @@ public static class EnumHelper
     /// <returns>The enum value corresponding to the string.</returns>
     public static T Parse<T>(string value, bool ignoreCase = true) where T : Enum
     {
-        return (T)Enum.Parse(typeof(T), value, ignoreCase);
+        try
+        {
+            return (T)Enum.Parse(typeof(T), value, ignoreCase);
+        }
+        catch (ArgumentException ex)
+        {
+            // Log the error, return default enum value, or rethrow a custom exception
+            // For example, you might want to log and return the default value:
+            Console.WriteLine($"Failed to parse '{value}' into enum {typeof(T).Name}: {ex.Message}");
+            return default; // Or specify a particular default value
+        }
     }
 
     /// <summary>
