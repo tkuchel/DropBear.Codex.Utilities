@@ -66,10 +66,11 @@ public class MurmurHash3Service : IHashingService
         var isValid = string.Equals(encodeResult.Value, expectedBase64Hash, StringComparison.Ordinal);
         return isValid ? Result.Success() : Result.Failure("Base64 hash verification failed.");
     }
-
+#pragma warning disable IDE0060
     public IHashingService WithHashSize(int size) =>
         // MurmurHash3 output size is determined by the algorithm (32-bit or 128-bit), so this method is effectively a noop.
         this;
+#pragma warning restore IDE0060
 
     public IHashingService WithSeed(uint seed)
     {

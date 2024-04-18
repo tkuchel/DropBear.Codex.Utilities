@@ -58,10 +58,11 @@ public class XxHashingService : IHashingService
             : Result.Failure("Base64 hash verification failed.");
     }
 
+#pragma warning disable IDE0060 // Remove unused parameter
     public IHashingService WithHashSize(int size) =>
         // XXHash output size is determined by the algorithm (32-bit or 64-bit), so this method is effectively a noop.
         this;
-
+#pragma warning restore IDE0060 // Remove unused parameter
     public IHashingService WithSeed(ulong seed)
     {
         _seed = seed;

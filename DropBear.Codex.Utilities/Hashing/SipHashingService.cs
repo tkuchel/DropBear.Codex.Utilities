@@ -11,7 +11,7 @@ public class SipHashingService : IHashingService
 
     public SipHashingService(byte[] key)
     {
-        if ((key?.Length) is not 16)
+        if (key?.Length is not 16)
             throw new ArgumentException("Key must be 16 bytes in length.", nameof(key));
         _key = key;
     }
@@ -81,13 +81,14 @@ public class SipHashingService : IHashingService
 
     public IHashingService WithKey(byte[] key)
     {
-        if ((key?.Length) is not 16)
+        if (key?.Length is not 16)
             throw new ArgumentException("Key must be 16 bytes in length.", nameof(key));
         _key = key;
         return this;
     }
-
+#pragma warning disable IDE0060
     public IHashingService WithHashSize(int size) =>
         // SipHash output size is fixed by the algorithm, so this method is effectively a noop.
         this;
+#pragma warning restore IDE0060
 }

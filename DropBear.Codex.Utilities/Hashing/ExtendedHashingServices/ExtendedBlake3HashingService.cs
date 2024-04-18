@@ -4,7 +4,7 @@ namespace DropBear.Codex.Utilities.Hashing.ExtendedHashingServices;
 
 public class ExtendedBlake3HashingService : Blake3HashingService
 {
-    public string IncrementalHash(IEnumerable<byte[]> dataSegments)
+    public static string IncrementalHash(IEnumerable<byte[]> dataSegments)
     {
         using var hasher = Hasher.New();
         foreach (var segment in dataSegments)
@@ -12,7 +12,7 @@ public class ExtendedBlake3HashingService : Blake3HashingService
         return hasher.Finalize().ToString();
     }
 
-    public string GenerateMac(byte[] data, byte[] key)
+    public static string GenerateMac(byte[] data, byte[] key)
     {
         if (key.Length is not 32)
             throw new ArgumentException("Key must be 256 bits (32 bytes).", nameof(key));
@@ -22,7 +22,7 @@ public class ExtendedBlake3HashingService : Blake3HashingService
         return hasher.Finalize().ToString();
     }
 
-    public byte[] DeriveKey(byte[] context, byte[] inputKeyingMaterial)
+    public static byte[] DeriveKey(byte[] context, byte[] inputKeyingMaterial)
     {
         using var hasher = Hasher.NewDeriveKey(context);
         hasher.Update(inputKeyingMaterial);
@@ -30,7 +30,7 @@ public class ExtendedBlake3HashingService : Blake3HashingService
         return result.AsSpan().ToArray();
     }
 
-    public string HashStream(Stream inputStream)
+    public static string HashStream(Stream inputStream)
     {
         using var hasher = Hasher.New();
         var buffer = new byte[4096]; // Buffer size can be adjusted based on needs.
