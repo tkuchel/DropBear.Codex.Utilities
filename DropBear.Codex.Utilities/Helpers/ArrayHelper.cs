@@ -33,4 +33,72 @@ public static class ArrayHelper
             bytesRemaining -= bytesToPrint;
         }
     }
+    
+    public static void CompareBytesArrays(byte[] array1, byte[] array2)
+    {
+        Console.WriteLine("Comparing byte arrays...");
+
+        // Check if the lengths are different
+        if (array1.Length != array2.Length)
+        {
+            Console.WriteLine($"The arrays have different lengths: {array1.Length} and {array2.Length}.");
+        }
+
+        int diffCount = 0;
+        int bytesPerLine = 16;
+        int maxLength = Math.Max(array1.Length, array2.Length);
+
+        for (int i = 0; i < maxLength; i += bytesPerLine)
+        {
+            int bytesToPrint = Math.Min(bytesPerLine, maxLength - i);
+
+            // Print the offset
+            Console.Write($"{i:X8}: ");
+
+            // Print the bytes for array1
+            for (int j = 0; j < bytesToPrint; j++)
+            {
+                int index = i + j;
+                if (index < array1.Length)
+                {
+                    Console.Write($"{array1[index]:X2} ");
+                }
+                else
+                {
+                    Console.Write("   ");
+                }
+            }
+
+            Console.Write(" ");
+
+            // Print the bytes for array2
+            for (int j = 0; j < bytesToPrint; j++)
+            {
+                int index = i + j;
+                if (index < array2.Length)
+                {
+                    Console.Write($"{array2[index]:X2} ");
+                    if (index < array1.Length && array1[index] != array2[index])
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Write("*");
+                        Console.ResetColor();
+                        diffCount++;
+                    }
+                    else
+                    {
+                        Console.Write(" ");
+                    }
+                }
+                else
+                {
+                    Console.Write("   ");
+                }
+            }
+
+            Console.WriteLine();
+        }
+
+        Console.WriteLine($"Total differences: {diffCount}");
+    }
 }

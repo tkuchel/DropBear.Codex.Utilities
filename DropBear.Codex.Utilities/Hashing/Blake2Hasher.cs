@@ -7,12 +7,12 @@ using DropBear.Codex.Utilities.Helpers;
 
 namespace DropBear.Codex.Utilities.Hashing;
 
-public class Blake2HashingService : IHashingService
+public class Blake2Hasher : IHasher
 {
     private int _hashSize = 32; // Default hash size for Blake2b
     private byte[]? _salt;
 
-    public IHashingService WithSalt(byte[] salt)
+    public IHasher WithSalt(byte[] salt)
     {
         _salt = salt;
         return this;
@@ -67,11 +67,11 @@ public class Blake2HashingService : IHashingService
             : Result.Failure("Base64 hash verification failed.");
     }
 
-    public IHashingService WithIterations(int iterations) =>
+    public IHasher WithIterations(int iterations) =>
         // Blake2b does not use the iterations parameter, so this is effectively a noop.
         this;
 
-    public IHashingService WithHashSize(int size)
+    public IHasher WithHashSize(int size)
     {
         _hashSize = size;
         return this;

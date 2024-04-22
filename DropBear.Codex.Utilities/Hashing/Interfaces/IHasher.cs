@@ -2,7 +2,7 @@
 
 namespace DropBear.Codex.Utilities.Hashing.Interfaces;
 
-public interface IHashingService
+public interface IHasher
 {
     Result<string> Hash(string input);
     Result Verify(string input, string expectedHash);
@@ -10,6 +10,6 @@ public interface IHashingService
     Result VerifyBase64Hash(byte[] data, string expectedBase64Hash);
 
     // Fluent API extensions
-    IHashingService WithSalt(byte[] salt);
-    IHashingService WithIterations(int iterations);
+    IHasher WithSalt(byte[] salt);
+    IHasher WithIterations(int iterations);
 }

@@ -5,15 +5,15 @@ using HashDepot;
 
 namespace DropBear.Codex.Utilities.Hashing;
 
-public class XxHashingService : IHashingService
+public class XxHasher : IHasher
 {
     private ulong _seed; // Allows setting a custom seed if needed, default is 0.
 
-    public IHashingService WithSalt(byte[] salt) =>
+    public IHasher WithSalt(byte[] salt) =>
         // XXHash does not use salt, so this method is effectively a noop.
         this;
 
-    public IHashingService WithIterations(int iterations) =>
+    public IHasher WithIterations(int iterations) =>
         // XXHash does not use iterations, so this method is effectively a noop.
         this;
 
@@ -59,11 +59,11 @@ public class XxHashingService : IHashingService
     }
 
 #pragma warning disable IDE0060 // Remove unused parameter
-    public IHashingService WithHashSize(int size) =>
+    public IHasher WithHashSize(int size) =>
         // XXHash output size is determined by the algorithm (32-bit or 64-bit), so this method is effectively a noop.
         this;
 #pragma warning restore IDE0060 // Remove unused parameter
-    public IHashingService WithSeed(ulong seed)
+    public IHasher WithSeed(ulong seed)
     {
         _seed = seed;
         return this;

@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddHashingServices(this IServiceCollection services)
     {
-        services.AddSingleton<IHashingServiceFactory, HashingServiceFactory>();
+        services.AddSingleton<IHashFactory, HashFactory>();
         return services;
     }
     
@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
     
     public static IServiceCollection AddMessageTemplateManager(this IServiceCollection services)
     {
-        services.AddSingleton<IMessageTemplateManager, MessageTemplateManager>();
+        services.AddSingleton<IMessageTemplateProvider, MessageTemplateProvider>();
         return services;
     }
 }

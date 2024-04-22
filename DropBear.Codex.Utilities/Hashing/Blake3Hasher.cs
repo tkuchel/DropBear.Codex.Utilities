@@ -5,13 +5,13 @@ using DropBear.Codex.Utilities.Hashing.Interfaces;
 
 namespace DropBear.Codex.Utilities.Hashing;
 
-public class Blake3HashingService : IHashingService
+public class Blake3Hasher : IHasher
 {
-    public IHashingService WithSalt(byte[] salt) =>
+    public IHasher WithSalt(byte[] salt) =>
         // Blake3 does not use salt, so this method is effectively a noop.
         this;
 
-    public IHashingService WithIterations(int iterations) =>
+    public IHasher WithIterations(int iterations) =>
         // Blake3 does not use iterations, so this method is effectively a noop.
         this;
 
@@ -70,7 +70,7 @@ public class Blake3HashingService : IHashingService
         }
     }
 #pragma warning disable IDE0060 // Remove unused parameter
-    public IHashingService WithHashSize(int size) =>
+    public IHasher WithHashSize(int size) =>
         // Blake3 has a fixed output size but implementing to comply with interface.
         this;
 #pragma warning restore IDE0060 // Remove unused parameter

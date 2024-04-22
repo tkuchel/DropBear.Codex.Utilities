@@ -8,7 +8,7 @@ namespace DropBear.Codex.Utilities.MessageTemplates;
 /// <summary>
 ///     Manages message templates and predefined messages for logging and formatting operations.
 /// </summary>
-public class MessageTemplateManager : IMessageTemplateManager
+public class MessageTemplateProvider : IMessageTemplateProvider
 {
     private readonly object _formatLock = new();
     private readonly ConcurrentDictionary<string, string> _predefinedMessages = new(StringComparer.OrdinalIgnoreCase);

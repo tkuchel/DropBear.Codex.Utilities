@@ -2,7 +2,7 @@
 
 namespace DropBear.Codex.Utilities.Hashing.ExtendedHashingServices;
 
-public class ExtendedBlake3HashingService : Blake3HashingService
+public class ExtendedBlake3Hasher : Blake3Hasher
 {
     public static string IncrementalHash(IEnumerable<byte[]> dataSegments)
     {

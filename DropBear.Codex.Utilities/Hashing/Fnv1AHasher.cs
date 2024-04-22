@@ -5,13 +5,13 @@ using HashDepot;
 
 namespace DropBear.Codex.Utilities.Hashing;
 
-public class Fnv1AHashingService : IHashingService
+public class Fnv1AHasher : IHasher
 {
-    public IHashingService WithSalt(byte[] salt) =>
+    public IHasher WithSalt(byte[] salt) =>
         // FNV-1a does not use salt, so this method is effectively a noop.
         this;
 
-    public IHashingService WithIterations(int iterations) =>
+    public IHasher WithIterations(int iterations) =>
         // FNV-1a does not use iterations, so this method is effectively a noop.
         this;
 
@@ -63,7 +63,7 @@ public class Fnv1AHashingService : IHashingService
         return isValid ? Result.Success() : Result.Failure("Base64 hash verification failed.");
     }
 #pragma warning disable IDE0060 // Remove unused parameter
-    public IHashingService WithHashSize(int size) =>
+    public IHasher WithHashSize(int size) =>
         // FNV-1a output size is determined by the algorithm (32-bit or 64-bit), so this method is effectively a noop.
         this;
 #pragma warning restore IDE0060 // Remove unused parameter

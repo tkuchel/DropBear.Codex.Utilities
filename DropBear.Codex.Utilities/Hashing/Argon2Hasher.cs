@@ -7,7 +7,7 @@ using Konscious.Security.Cryptography;
 
 namespace DropBear.Codex.Utilities.Hashing;
 
-public class Argon2HashingService : IHashingService
+public class Argon2Hasher : IHasher
 {
     private int _degreeOfParallelism = 8; // Default degree of parallelism
     private int _hashSize = 16; // Default hash size
@@ -15,13 +15,13 @@ public class Argon2HashingService : IHashingService
     private int _memorySize = 1024 * 1024; // Default memory size (1GB)
     private byte[]? _salt;
 
-    public IHashingService WithSalt(byte[] salt)
+    public IHasher WithSalt(byte[] salt)
     {
         _salt = salt;
         return this;
     }
 
-    public IHashingService WithIterations(int iterations)
+    public IHasher WithIterations(int iterations)
     {
         _iterations = iterations;
         return this;
@@ -71,19 +71,19 @@ public class Argon2HashingService : IHashingService
         return base64Hash == expectedBase64Hash ? Result.Success() : Result.Failure("Base64 hash verification failed.");
     }
 
-    public IHashingService WithHashSize(int size)
+    public IHasher WithHashSize(int size)
     {
         _hashSize = size;
         return this;
     }
 
-    public IHashingService WithDegreeOfParallelism(int degree)
+    public IHasher WithDegreeOfParallelism(int degree)
     {
         _degreeOfParallelism = degree;
         return this;
     }
 
-    public IHashingService WithMemorySize(int size)
+    public IHasher WithMemorySize(int size)
     {
         _memorySize = size;
         return this;

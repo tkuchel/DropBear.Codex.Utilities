@@ -1,6 +1,6 @@
 ﻿namespace DropBear.Codex.Utilities.MessageTemplates;
 
-public interface IMessageTemplateManager
+public interface IMessageTemplateProvider
 {
     /// <summary>
     /// Registers a message template with the specified ID.

@@ -5,17 +5,17 @@ using HashDepot;
 
 namespace DropBear.Codex.Utilities.Hashing;
 
-public class MurmurHash3Service : IHashingService
+public class MurmurHash3Service : IHasher
 {
     private uint _seed; // Allows for seed to be changed via fluent API
 
     public MurmurHash3Service(uint seed = 0) => _seed = seed;
 
-    public IHashingService WithSalt(byte[] salt) =>
+    public IHasher WithSalt(byte[] salt) =>
         // MurmurHash3 does not use salt, so this method is effectively a noop.
         this;
 
-    public IHashingService WithIterations(int iterations) =>
+    public IHasher WithIterations(int iterations) =>
         // MurmurHash3 does not use iterations, so this method is effectively a noop.
         this;
 
@@ -67,12 +67,12 @@ public class MurmurHash3Service : IHashingService
         return isValid ? Result.Success() : Result.Failure("Base64 hash verification failed.");
     }
 #pragma warning disable IDE0060
-    public IHashingService WithHashSize(int size) =>
+    public IHasher WithHashSize(int size) =>
         // MurmurHash3 output size is determined by the algorithm (32-bit or 128-bit), so this method is effectively a noop.
         this;
 #pragma warning restore IDE0060
 
-    public IHashingService WithSeed(uint seed)
+    public IHasher WithSeed(uint seed)
     {
         _seed = seed;
         return this;
