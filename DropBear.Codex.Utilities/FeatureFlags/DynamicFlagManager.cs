@@ -134,7 +134,7 @@ public class DynamicFlagManager : IDynamicFlagManager
     /// </summary>
     public Dictionary<string, bool> GetAllFlags() => _flagMap.Keys.ToDictionary(flag => flag, IsFlagSet, StringComparer.OrdinalIgnoreCase);
 
-    private class SerializationData
+    private sealed class SerializationData
     {
         public ConcurrentDictionary<string, int> Flags { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public int CurrentState { get; set; }
