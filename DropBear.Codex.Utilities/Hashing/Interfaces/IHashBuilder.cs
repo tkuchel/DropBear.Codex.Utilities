@@ -1,6 +1,6 @@
 ﻿namespace DropBear.Codex.Utilities.Hashing.Interfaces;
 
-public interface IHashFactory
+public interface IHashBuilder
 {
     IHasher GetHasher(string key);
 }

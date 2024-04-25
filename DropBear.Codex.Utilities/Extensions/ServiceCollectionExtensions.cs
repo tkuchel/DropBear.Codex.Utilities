@@ -1,7 +1,8 @@
 ﻿using DropBear.Codex.Utilities.FeatureFlags;
-using DropBear.Codex.Utilities.Hashing.Factories;
+using DropBear.Codex.Utilities.Hashing.Builder;
 using DropBear.Codex.Utilities.Hashing.Interfaces;
 using DropBear.Codex.Utilities.MessageTemplates;
+using DropBear.Codex.Utilities.MessageTemplates.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DropBear.Codex.Utilities.Extensions;
@@ -10,7 +11,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddHashingServices(this IServiceCollection services)
     {
-        services.AddSingleton<IHashFactory, HashFactory>();
+        services.AddSingleton<IHashBuilder, HashBuilder>();
         return services;
     }
     

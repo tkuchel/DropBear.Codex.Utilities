@@ -1,13 +1,13 @@
 ﻿using DropBear.Codex.Utilities.Hashing.ExtendedHashingServices;
 using DropBear.Codex.Utilities.Hashing.Interfaces;
 
-namespace DropBear.Codex.Utilities.Hashing.Factories;
+namespace DropBear.Codex.Utilities.Hashing.Builder;
 
-public class HashFactory : IHashFactory
+public class HashBuilder : IHashBuilder
 {
     private readonly Dictionary<string, Func<IHasher>> _serviceConstructors;
 
-    public HashFactory() =>
+    public HashBuilder() =>
         _serviceConstructors = new Dictionary<string, Func<IHasher>>(StringComparer.OrdinalIgnoreCase)
         {
             { "argon2", () => new Argon2Hasher() },
