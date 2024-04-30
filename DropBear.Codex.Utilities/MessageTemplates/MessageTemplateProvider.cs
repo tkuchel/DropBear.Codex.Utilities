@@ -115,7 +115,7 @@ public class MessageTemplateProvider : IMessageTemplateProvider
         foreach (var (templateId, template) in templatesToRegister)
         {
             var result = RegisterTemplate(templateId, template);
-            if (!result.IsSuccess) errors.Add($"Failed to register template '{templateId}': {result.Error}");
+            if (!result.IsSuccess) errors.Add($"Failed to register template '{templateId}': {result.ErrorMessage}");
         }
 
         return errors.Count is not 0 ? Result.Failure(string.Join('\n', errors)) : Result.Success();
@@ -158,7 +158,7 @@ public class MessageTemplateProvider : IMessageTemplateProvider
         foreach (var (messageId, message) in messagesToRegister)
         {
             var result = RegisterPredefinedMessage(messageId, message);
-            if (!result.IsSuccess) errors.Add($"Failed to register predefined message '{messageId}': {result.Error}");
+            if (!result.IsSuccess) errors.Add($"Failed to register predefined message '{messageId}': {result.ErrorMessage}");
         }
 
         return errors.Count is not 0 ? Result.Failure(string.Join('\n', errors)) : Result.Success();

@@ -44,7 +44,7 @@ public class MessageTemplateProviderBuilder
 
         if (!validationResult.IsSuccess)
         {
-            _logger.ZLogError($"Failed to add template: {validationResult.Error}");
+            _logger.ZLogError($"Failed to add template: {validationResult.ErrorMessage}");
             return this; // Return immediately on failure
         }
 
@@ -82,7 +82,7 @@ public class MessageTemplateProviderBuilder
         var validationResult = ValidateInput(messageId, message, "Predefined message");
         if (!validationResult.IsSuccess)
         {
-            _logger.ZLogError($"Failed to add template: {validationResult.Error}");
+            _logger.ZLogError($"Failed to add template: {validationResult.ErrorMessage}");
             return this; // Return immediately on failure
         }
 
