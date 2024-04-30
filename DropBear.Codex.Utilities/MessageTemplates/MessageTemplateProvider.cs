@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Text;
 using DropBear.Codex.AppLogger.Builders;
 using DropBear.Codex.Core;
+using DropBear.Codex.Utilities.Helpers;
 using DropBear.Codex.Utilities.MessageTemplates.Interfaces;
 using Microsoft.Extensions.Logging;
 using Utf8StringInterpolation;
@@ -71,30 +72,22 @@ public class MessageTemplateProvider : IMessageTemplateProvider
             try
             {
                 if (string.IsNullOrWhiteSpace(templateOrMessageId))
-                    throw new ArgumentException("Template or message ID cannot be null or whitespace.",
-                        nameof(templateOrMessageId));
+                    throw new ArgumentException("Template or message ID cannot be null or whitespace.", nameof(templateOrMessageId));
 
                 if (_predefinedMessages.TryGetValue(templateOrMessageId, out var predefinedMessage))
                 {
                     if (args.Length > 0)
-                        throw new ArgumentException(
-                            $"Predefined message '{templateOrMessageId}' does not accept arguments.", nameof(args));
-
+                        throw new ArgumentException($"Predefined message '{templateOrMessageId}' does not accept arguments.", nameof(args));
                     return Encoding.UTF8.GetBytes(predefinedMessage);
                 }
 
                 if (!_templates.TryGetValue(templateOrMessageId, out var template))
-                    throw new KeyNotFoundException(
-                        $"No template or predefined message found with the ID '{templateOrMessageId}'.");
+                    throw new KeyNotFoundException($"No template or predefined message found with the ID '{templateOrMessageId}'.");
 
                 var bufferWriter = new ArrayBufferWriter<byte>();
-                using (var writer = Utf8String.CreateWriter(bufferWriter))
-                {
-                    writer.AppendLiteral(template);
-                    foreach (var arg in args) writer.AppendFormatted(arg ?? "null");
-                }
-
-                return bufferWriter.WrittenSpan.ToArray();
+                // Correctly format the string into UTF8 bytes using interpolated string handler.
+                Utf8String.Format(bufferWriter, $"{template.FormatWith(args)}");  // Assuming FormatWith is a method that formats your template string with args.
+                return bufferWriter.WrittenMemory.ToArray();
             }
             catch (Exception ex)
             {
@@ -102,6 +95,7 @@ public class MessageTemplateProvider : IMessageTemplateProvider
             }
         }
     }
+
 
     public string FormatString(string templateOrMessageId, params object?[] args)
     {
@@ -170,4 +164,5 @@ public class MessageTemplateProvider : IMessageTemplateProvider
             return Result.Failure($"{type} ID and value cannot be null or whitespace.");
         return Result.Success();
     }
+
 }

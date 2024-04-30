@@ -13,6 +13,18 @@ namespace DropBear.Codex.Utilities.Helpers;
 public static partial class StringHelper
 {
     /// <summary>
+    /// Formats the string according to the provided arguments.
+    /// </summary>
+    /// <param name="template">The string template containing placeholders.</param>
+    /// <param name="args">The arguments to format into the template.</param>
+    /// <returns>A formatted string with arguments interpolated.</returns>
+    public static string FormatWith(this string template, params object?[] args)
+    {
+        ArgumentNullException.ThrowIfNull(template);
+        return string.Format(template, args);
+    }
+    
+    /// <summary>
     ///     Converts the first character of a string to uppercase.
     /// </summary>
     /// <param name="input">The string to modify.</param>
