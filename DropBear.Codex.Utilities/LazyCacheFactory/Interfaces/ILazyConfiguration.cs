@@ -9,4 +9,8 @@ public interface ILazyConfiguration<T>
     ILazyConfiguration<T> WithCaching(TimeSpan expiration = default);
     Lazy<T> Build();
     AsyncLazy<T> BuildAsync();
+    ResettableLazy<T> BuildResettable();
+    ResettableLazy<T> BuildResettableAsync();
+    Lazy<T> BuildWithForcedSync();
+    ResettableLazy<T> BuildWithForcedSyncResettable();
 }

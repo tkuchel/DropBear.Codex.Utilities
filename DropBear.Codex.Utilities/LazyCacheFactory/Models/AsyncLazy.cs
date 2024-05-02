@@ -4,8 +4,8 @@ namespace DropBear.Codex.Utilities.LazyCacheFactory.Models;
 
 public class AsyncLazy<T> : Lazy<Task<T>>
 {
-    public AsyncLazy(Func<Task<T>> taskFactory) :
-        base(() => Task.Run(taskFactory))
+    public AsyncLazy(Func<Task<T>> taskFactory, bool runOnThreadPool = true) :
+        base(() => runOnThreadPool ? Task.Run(taskFactory) : taskFactory())
     {
     }
 

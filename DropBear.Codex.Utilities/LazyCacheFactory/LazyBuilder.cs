@@ -11,9 +11,14 @@ namespace DropBear.Codex.Utilities.LazyCacheFactory;
 public class LazyBuilder<T> : ILazyConfiguration<T>
 {
     private readonly MemoryCacheManager _cacheManager;
+
+    private Func<Task<T>> _asyncInitializer =
+        () => throw new InvalidOperationException("Asynchronous initialization function not set.");
+
     private TimeSpan? _cacheExpiration;
-    private Func<Task<T>> _asyncInitializer = () => throw new InvalidOperationException("Asynchronous initialization function not set.");
-    private Func<T> _initializer = () => throw new InvalidOperationException("Synchronization initialization function not set.");
+
+    private Func<T> _initializer = () =>
+        throw new InvalidOperationException("Synchronization initialization function not set.");
 
 
     /// <summary>
@@ -29,7 +34,8 @@ public class LazyBuilder<T> : ILazyConfiguration<T>
     /// <returns>The current instance of <see cref="LazyBuilder{T}" />.</returns>
     public ILazyConfiguration<T> WithInitialization(Func<T> initializer)
     {
-        _initializer = initializer ?? throw new ArgumentNullException(nameof(initializer), "Initializer cannot be null.");
+        _initializer = initializer ??
+                       throw new ArgumentNullException(nameof(initializer), "Initializer cannot be null.");
         return this;
     }
 
@@ -40,7 +46,9 @@ public class LazyBuilder<T> : ILazyConfiguration<T>
     /// <returns>The current instance of <see cref="LazyBuilder{T}" />.</returns>
     public ILazyConfiguration<T> WithAsyncInitialization(Func<Task<T>> asyncInitializer)
     {
-        _asyncInitializer = asyncInitializer ?? throw new ArgumentNullException(nameof(asyncInitializer), "Async initializer cannot be null.");
+        _asyncInitializer = asyncInitializer ??
+                            throw new ArgumentNullException(nameof(asyncInitializer),
+                                "Async initializer cannot be null.");
         return this;
     }
 
@@ -102,6 +110,70 @@ public class LazyBuilder<T> : ILazyConfiguration<T>
             return Task.Run(async () => await (_cacheExpiration.HasValue
                 ? _cacheManager.GetOrCreateAsync(typeof(T).ToString(), _asyncInitializer, _cacheExpiration)
                 : _asyncInitializer()).ConfigureAwait(false)).Result;
+        });
+    }
+
+    /// <summary>
+    ///     Builds a ResettableLazy&lt;T&gt; instance using a potentially asynchronous initialization function,
+    ///     forcing it to run synchronously. Use with caution as this can lead to deadlocks and performance issues.
+    ///     This variation allows the value to be reset and recomputed.
+    /// </summary>
+    /// <returns>A ResettableLazy&lt;T&gt; that will initialize the value on first access and can be reset to reinitialize.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if no asynchronous initializer is set.</exception>
+    public ResettableLazy<T> BuildWithForcedSyncResettable()
+    {
+        if (_asyncInitializer is null)
+            throw new InvalidOperationException("Asynchronous initializer must be set.");
+
+        return new ResettableLazy<T>(() =>
+        {
+            // Using Task.Run to offload to the thread pool and calling .Result to force synchronization
+            return Task.Run(async () => await (_cacheExpiration.HasValue
+                ? _cacheManager.GetOrCreateAsync(typeof(T).ToString(), _asyncInitializer, _cacheExpiration)
+                : _asyncInitializer()).ConfigureAwait(false)).Result;
+        });
+    }
+
+
+    /// <summary>
+    ///     Builds a resettable lazy instance using the specified synchronous initialization function.
+    ///     This allows the lazy value to be reset and recomputed when needed.
+    /// </summary>
+    /// <returns>A <see cref="ResettableLazy{T}" /> that encapsulates a lazily initialized value with the ability to reset.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if no synchronous initialization function has been set.</exception>
+    public ResettableLazy<T> BuildResettable()
+    {
+        if (_initializer is null)
+            throw new InvalidOperationException("Synchronous initializer must be set.");
+
+        return new ResettableLazy<T>(() => _cacheExpiration.HasValue
+            ? _cacheManager.GetOrCreate(typeof(T).ToString(), _initializer, _cacheExpiration)
+            : _initializer());
+    }
+
+
+    /// <summary>
+    ///     Builds a resettable lazy instance using the specified asynchronous initialization function.
+    ///     This method synchronously wraps the asynchronous operation, which can lead to performance implications.
+    ///     Use with caution as this method forces asynchronous operations to complete synchronously, potentially causing
+    ///     deadlocks and performance bottlenecks.
+    /// </summary>
+    /// <returns>
+    ///     A <see cref="ResettableLazy{T}" /> that encapsulates a lazily initialized value with the ability to reset. The
+    ///     initialization is handled asynchronously but consumed synchronously.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">Thrown if no asynchronous initialization function has been set.</exception>
+    public ResettableLazy<T> BuildResettableAsync()
+    {
+        if (_asyncInitializer is null)
+            throw new InvalidOperationException("Asynchronous initializer must be set.");
+
+        return new ResettableLazy<T>(() =>
+        {
+            var result = Task.Run(async () => await (_cacheExpiration.HasValue
+                ? _cacheManager.GetOrCreateAsync(typeof(T).ToString(), _asyncInitializer, _cacheExpiration)
+                : _asyncInitializer()).ConfigureAwait(false)).Result;
+            return result;
         });
     }
 }
