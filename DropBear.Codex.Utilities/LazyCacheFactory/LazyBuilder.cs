@@ -11,9 +11,10 @@ namespace DropBear.Codex.Utilities.LazyCacheFactory;
 public class LazyBuilder<T> : ILazyConfiguration<T>
 {
     private readonly MemoryCacheManager _cacheManager;
-    private Func<Task<T>> _asyncInitializer;
     private TimeSpan? _cacheExpiration;
-    private Func<T> _initializer;
+    private Func<Task<T>> _asyncInitializer = () => throw new InvalidOperationException("Asynchronous initialization function not set.");
+    private Func<T> _initializer = () => throw new InvalidOperationException("Synchronization initialization function not set.");
+
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="LazyBuilder{T}" /> class.
@@ -28,7 +29,7 @@ public class LazyBuilder<T> : ILazyConfiguration<T>
     /// <returns>The current instance of <see cref="LazyBuilder{T}" />.</returns>
     public ILazyConfiguration<T> WithInitialization(Func<T> initializer)
     {
-        _initializer = initializer;
+        _initializer = initializer ?? throw new ArgumentNullException(nameof(initializer), "Initializer cannot be null.");
         return this;
     }
 
@@ -39,7 +40,7 @@ public class LazyBuilder<T> : ILazyConfiguration<T>
     /// <returns>The current instance of <see cref="LazyBuilder{T}" />.</returns>
     public ILazyConfiguration<T> WithAsyncInitialization(Func<Task<T>> asyncInitializer)
     {
-        _asyncInitializer = asyncInitializer;
+        _asyncInitializer = asyncInitializer ?? throw new ArgumentNullException(nameof(asyncInitializer), "Async initializer cannot be null.");
         return this;
     }
 
