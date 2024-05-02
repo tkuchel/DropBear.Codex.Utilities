@@ -21,14 +21,20 @@ public class LazyBuilder<T> : ILazyConfiguration<T>
         return this;
     }
 
-    public ILazyConfiguration<T> WithCaching(TimeSpan expiration)
+    public ILazyConfiguration<T> WithCaching(TimeSpan expiration = default)
     {
-        _cacheExpiration = expiration;
+        // Set the default expiration to 5 minutes if no expiration time is provided
+        // or if the provided expiration is the default value for TimeSpan (which is zero).
+        _cacheExpiration = expiration == default ? TimeSpan.FromMinutes(5) : expiration;
         return this;
     }
 
+
     public Lazy<T> Build()
     {
+        if (_cacheExpiration is null)
+            throw new InvalidOperationException("Cache expiration not set.");
+
         if (_asyncInitializer is not null)
             throw new InvalidOperationException("Build method does not support asynchronous initializers.");
         return new Lazy<T>(() => _cacheExpiration.HasValue
@@ -44,6 +50,9 @@ public class LazyBuilder<T> : ILazyConfiguration<T>
 
     public AsyncLazy<T> BuildAsync()
     {
+        if (_cacheExpiration is null)
+            throw new InvalidOperationException("Cache expiration not set.");
+
         if (_initializer is not null)
             throw new InvalidOperationException("BuildAsync method does not support synchronous initializers.");
         return new AsyncLazy<T>(() => _cacheExpiration.HasValue
