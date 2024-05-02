@@ -62,4 +62,47 @@ public class MemoryCacheManager
             throw; // It's often useful to let the caller know there was a problem with caching
         }
     }
+
+    public async Task<T> GetOrCreateAsync<T>(object key, Func<Task<T>> createItem, TimeSpan? absoluteExpiration = null)
+    {
+        if (key is null)
+        {
+            _logger.ZLogError($"Cache key cannot be null.");
+            throw new ArgumentNullException(nameof(key), "Cache key cannot be null.");
+        }
+
+        if (createItem is null)
+        {
+            _logger.ZLogError($"Creation function cannot be null.");
+            throw new ArgumentNullException(nameof(createItem), "Creation function cannot be null.");
+        }
+
+        try
+        {
+            return await _cache.GetOrCreateAsync(key, async entry =>
+            {
+                if (absoluteExpiration.HasValue) entry.AbsoluteExpirationRelativeToNow = absoluteExpiration;
+
+                try
+                {
+                    var item = await createItem().ConfigureAwait(false);
+
+                    if (item is not null) return item;
+
+                    _logger.ZLogWarning($"Created item for key {key} is null.");
+                    throw new InvalidOperationException("Created item cannot be null.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.ZLogError(ex, $"Error occurred while creating item for cache key {key}.");
+                    throw; // Rethrow to maintain exception propagation
+                }
+            }).ConfigureAwait(false) ?? throw new InvalidOperationException("Cache item is null.");
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(ex, $"Failed to access cache or handle item creation for key {key}.");
+            throw; // Rethrow to let the caller handle the exception or fail accordingly
+        }
+    }
 }
