@@ -176,4 +176,46 @@ public class LazyBuilder<T> : ILazyConfiguration<T>
             return result;
         });
     }
+
+    /// <summary>
+    ///     Builds an AsyncResettableLazy&lt;T&gt; instance using the specified asynchronous initialization function.
+    /// </summary>
+    /// <returns>An AsyncResettableLazy&lt;T&gt; that will initialize the value asynchronously and can be reset.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if no asynchronous initialization function has been set.</exception>
+    public AsyncResettableLazy<T> BuildAsyncResettable()
+    {
+        if (_asyncInitializer is null)
+            throw new InvalidOperationException("Asynchronous initializer must be set.");
+
+        return new AsyncResettableLazy<T>(() => _cacheExpiration.HasValue
+            ? _cacheManager.GetOrCreateAsync(typeof(T).ToString(), _asyncInitializer, _cacheExpiration)
+            : _asyncInitializer());
+    }
+
+    /// <summary>
+    ///     Builds an AsyncResettableLazy&lt;T&gt; instance using a potentially asynchronous initialization function,
+    ///     forcing it to run synchronously. This method allows the value to be reset and recomputed asynchronously,
+    ///     but values are retrieved synchronously, which can lead to deadlocks and performance issues. Use with caution.
+    /// </summary>
+    /// <returns>
+    ///     An AsyncResettableLazy&lt;T&gt; that will initialize the value asynchronously on first access and can be
+    ///     reset, with forced synchronous retrieval.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">Thrown if no asynchronous initialization function has been set.</exception>
+    public AsyncResettableLazy<T> BuildWithForcedSyncAsyncResettable()
+    {
+        if (_asyncInitializer is null)
+            throw new InvalidOperationException("Asynchronous initializer must be set.");
+
+        return new AsyncResettableLazy<T>(async () =>
+        {
+            var task = _cacheExpiration.HasValue
+                ? _cacheManager.GetOrCreateAsync(typeof(T).ToString(), _asyncInitializer, _cacheExpiration)
+                : _asyncInitializer();
+
+            // Force the task to run and block until completion
+            var result = await Task.Run(() => task).ConfigureAwait(false);
+            return result;
+        });
+    }
 }

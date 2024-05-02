@@ -13,4 +13,6 @@ public interface ILazyConfiguration<T>
     ResettableLazy<T> BuildResettableAsync();
     Lazy<T> BuildWithForcedSync();
     ResettableLazy<T> BuildWithForcedSyncResettable();
+    AsyncResettableLazy<T> BuildAsyncResettable();
+    AsyncResettableLazy<T> BuildWithForcedSyncAsyncResettable();
 }
