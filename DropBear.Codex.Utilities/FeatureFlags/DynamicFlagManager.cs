@@ -2,6 +2,7 @@
 using System.Text.Json;
 using DropBear.Codex.AppLogger.Builders;
 using Microsoft.Extensions.Logging;
+using ZLogger;
 
 namespace DropBear.Codex.Utilities.FeatureFlags;
 
@@ -32,10 +33,14 @@ public class DynamicFlagManager : IDynamicFlagManager
     public void AddFlag(string flagName)
     {
         if (_flagMap.ContainsKey(flagName) || _nextFreeBit >= 32)
+        {
+            _logger.ZLogError($"Flag already exists or limit exceeded.");
             throw new InvalidOperationException("Flag already exists or limit exceeded.");
-
+        }
+            
         _flagMap[flagName] = 1 << _nextFreeBit++;
         _cache.Clear(); // Reset the cache to ensure consistency.
+        _logger.ZLogInformation($"Flag {flagName} added.");
     }
 
     /// <summary>
@@ -47,9 +52,11 @@ public class DynamicFlagManager : IDynamicFlagManager
         {
             _flags &= ~bitValue;
             _cache.Clear();
+            _logger.ZLogInformation($"Flag {flagName} removed.");
         }
         else
         {
+            _logger.ZLogError($"Flag not found.");
             throw new KeyNotFoundException("Flag not found.");
         }
     }
@@ -63,9 +70,11 @@ public class DynamicFlagManager : IDynamicFlagManager
         {
             _flags |= bitValue;
             _cache[flagName] = true;
+            _logger.ZLogInformation($"Flag {flagName} set.");
         }
         else
         {
+            _logger.ZLogError($"Flag not found.");
             throw new KeyNotFoundException("Flag not found.");
         }
     }
@@ -79,9 +88,11 @@ public class DynamicFlagManager : IDynamicFlagManager
         {
             _flags &= ~bitValue;
             _cache[flagName] = false;
+            _logger.ZLogInformation($"Flag {flagName} cleared.");
         }
         else
         {
+            _logger.ZLogError($"Flag not found.");
             throw new KeyNotFoundException("Flag not found.");
         }
     }
@@ -95,9 +106,11 @@ public class DynamicFlagManager : IDynamicFlagManager
         {
             _flags ^= bitValue;
             _cache[flagName] = (_flags & bitValue) == bitValue;
+            _logger.ZLogInformation($"Flag {flagName} toggled.");
         }
         else
         {
+            _logger.ZLogError($"Flag not found.");
             throw new KeyNotFoundException("Flag not found.");
         }
     }
@@ -111,10 +124,14 @@ public class DynamicFlagManager : IDynamicFlagManager
             return isSet;
 
         if (!_flagMap.TryGetValue(flagName, out var bitValue))
+        {
+            _logger.ZLogError($"Flag not found.");
             throw new KeyNotFoundException("Flag not found.");
+        }
 
         isSet = (_flags & bitValue) == bitValue;
         _cache[flagName] = isSet; // Cache the result.
+        
         return isSet;
     }
 
@@ -124,6 +141,7 @@ public class DynamicFlagManager : IDynamicFlagManager
     public string Serialize()
     {
         var data = new SerializationData { Flags = _flagMap, CurrentState = _flags, NextFreeBit = _nextFreeBit };
+        _logger.ZLogInformation($"Flag data serialized.");
         return JsonSerializer.Serialize(data);
     }
 
@@ -134,7 +152,10 @@ public class DynamicFlagManager : IDynamicFlagManager
     {
         var data = JsonSerializer.Deserialize<SerializationData>(serializedData);
         if (data is null)
+        {
+            _logger.ZLogError($"Failed to deserialize flag data.");
             throw new InvalidOperationException("Failed to deserialize flag data.");
+        }
 
         _flagMap.Clear();
         foreach (var (key, value) in data.Flags)
@@ -143,6 +164,7 @@ public class DynamicFlagManager : IDynamicFlagManager
         _flags = data.CurrentState;
         _nextFreeBit = data.NextFreeBit;
         _cache.Clear();
+        _logger.ZLogInformation($"Flag data deserialized.");
     }
 
     /// <summary>
