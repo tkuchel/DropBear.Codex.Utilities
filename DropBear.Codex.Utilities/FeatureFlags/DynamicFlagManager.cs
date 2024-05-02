@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
+using DropBear.Codex.AppLogger.Builders;
+using Microsoft.Extensions.Logging;
 
 namespace DropBear.Codex.Utilities.FeatureFlags;
 
@@ -9,6 +11,20 @@ public class DynamicFlagManager : IDynamicFlagManager
     private readonly ConcurrentDictionary<string, int> _flagMap = new(StringComparer.OrdinalIgnoreCase);
     private int _flags;
     private int _nextFreeBit;
+    private readonly ILogger<DynamicFlagManager> _logger;
+
+    public DynamicFlagManager()
+    {
+        _flags = 0;
+        _nextFreeBit = 0;
+        
+        var loggerFactory = new LoggerConfigurationBuilder()
+            .SetLogLevel(LogLevel.Information)
+            .EnableConsoleOutput()
+            .Build();
+
+        _logger = loggerFactory.CreateLogger<DynamicFlagManager>();
+    }
 
     /// <summary>
     ///     Adds a new flag to the manager if it does not already exist.
