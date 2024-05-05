@@ -9,6 +9,7 @@ public class ResettableLazy<T>
     private readonly object _lock = new();
     private readonly Func<T> _valueFactory;
     private T _value;
+    private volatile bool _isValueCreated;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResettableLazy{T}"/> class with the specified value factory.
@@ -20,7 +21,7 @@ public class ResettableLazy<T>
         _valueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
         _value = defaultValue;
         DefaultValue = defaultValue;
-        IsValueCreated = false;
+        _isValueCreated = false;
     }
 
     /// <summary>
@@ -30,19 +31,20 @@ public class ResettableLazy<T>
     {
         get
         {
-            if (IsValueCreated) return _value;
+            if (_isValueCreated) return _value;
             lock (_lock)
             {
-                if (IsValueCreated) return _value;
+                if (_isValueCreated) return _value;
                 try
                 {
                     _value = _valueFactory();
-                    IsValueCreated = true;
+                    _isValueCreated = true;
                 }
                 catch
                 {
-                    _value = DefaultValue;
-                    throw;
+                    _value = DefaultValue; // Consider logging this exception or handling it differently
+                    _isValueCreated = false; // Consider whether to mark it as not created
+                    throw; // Rethrowing the exception maintains the stack trace
                 }
             }
 
@@ -58,7 +60,17 @@ public class ResettableLazy<T>
     /// <summary>
     /// Gets a value indicating whether the value has been created.
     /// </summary>
-    public bool IsValueCreated { get; private set; }
+    public bool IsValueCreated
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _isValueCreated;
+            }
+        }
+    }
+
 
     /// <summary>
     /// Resets the lazy value, allowing it to be recreated on the next access.
@@ -67,7 +79,7 @@ public class ResettableLazy<T>
     {
         lock (_lock)
         {
-            IsValueCreated = false;
+            _isValueCreated = false;
             _value = DefaultValue; // Reset the value to the default value
         }
     }
@@ -79,7 +91,10 @@ public class ResettableLazy<T>
     /// <returns><c>true</c> if the value has been created; otherwise, <c>false</c>.</returns>
     public bool TryGetValue(out T value)
     {
-        value = IsValueCreated ? _value : DefaultValue;
-        return IsValueCreated;
+        lock (_lock) // Ensure thread safety on read
+        {
+            value = _isValueCreated ? _value : DefaultValue;
+            return _isValueCreated;
+        }
     }
 }

@@ -15,8 +15,16 @@ public class AsyncLazy<T> : Lazy<Task<T>>
     /// <param name="runOnThreadPool">Specifies whether the factory function should be executed on the thread pool.</param>
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the asynchronous initialization.</param>
     public AsyncLazy(Func<CancellationToken, Task<T>> taskFactory, bool runOnThreadPool = true, CancellationToken cancellationToken = default) :
-        base(() => runOnThreadPool ? Task.Run(() => taskFactory(cancellationToken), cancellationToken) : taskFactory(cancellationToken))
+        base(() => InitializeAsync(taskFactory, runOnThreadPool, cancellationToken), true) // True to make it thread-safe
     {
+    }
+    
+    private static Task<T> InitializeAsync(Func<CancellationToken, Task<T>> taskFactory, bool runOnThreadPool, CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return Task.FromCanceled<T>(cancellationToken);
+
+        return runOnThreadPool ? Task.Run(() => taskFactory(cancellationToken), cancellationToken) : taskFactory(cancellationToken);
     }
 
     /// <summary>
