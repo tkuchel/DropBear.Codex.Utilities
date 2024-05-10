@@ -53,7 +53,8 @@ public class DebounceService : IDebounceService
         key = GenerateKey(key, caller, filePath, lineNumber);
         debounceTime ??= _defaultDebounceTime;
 
-        if (IsDebounced(key, debounceTime.Value)) return Result<T>.Failure("Operation debounced.");
+        if (IsDebounced(key, debounceTime.Value, out var isFirstCall) && !isFirstCall)
+            return Result<T>.Failure("Operation debounced.");
 
         try
         {
@@ -99,7 +100,8 @@ public class DebounceService : IDebounceService
         key = GenerateKey(key, caller, filePath, lineNumber);
         debounceTime ??= _defaultDebounceTime;
 
-        if (IsDebounced(key, debounceTime.Value)) return Result.Failure("Operation debounced.");
+        if (IsDebounced(key, debounceTime.Value, out var isFirstCall) && !isFirstCall)
+            return Result.Failure("Operation debounced.");
 
         try
         {
@@ -155,7 +157,8 @@ public class DebounceService : IDebounceService
         key = GenerateKey(key, caller, filePath, lineNumber);
         debounceTime ??= _defaultDebounceTime;
 
-        if (IsDebounced(key, debounceTime.Value)) return Result.Failure("Operation debounced.");
+        if (IsDebounced(key, debounceTime.Value, out var isFirstCall) && !isFirstCall)
+            return Result.Failure("Operation debounced.");
 
         try
         {
@@ -169,25 +172,31 @@ public class DebounceService : IDebounceService
 
 
     /// <summary>
-    ///     Checks if a given key has been debounced within the specified timeframe.
+    ///     Checks if a given key has been debounced within the specified timeframe and identifies if it's the first call.
     /// </summary>
     /// <param name="key">The unique key for the operation to check.</param>
     /// <param name="debounceTime">The debounce interval.</param>
+    /// <param name="isFirstCall">Out parameter indicating whether this is the first call.</param>
     /// <returns>True if the operation is still within the debounce time, false otherwise.</returns>
-    private bool IsDebounced(string key, TimeSpan debounceTime)
+    private bool IsDebounced(string key, TimeSpan debounceTime, out bool isFirstCall)
     {
         var cacheKey = $"Debounce-{key}";
-        var lastExecuted = _memoryCache.GetOrCreate(cacheKey, entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = debounceTime;
-            return DateTimeOffset.UtcNow;
-        });
+        var lastExecuted = _memoryCache.Get<DateTimeOffset?>(cacheKey);
 
-        if (DateTimeOffset.UtcNow - lastExecuted >= debounceTime) return false;
+        if (!lastExecuted.HasValue)
+        {
+            isFirstCall = true;
+            _memoryCache.Set(cacheKey, DateTimeOffset.UtcNow,
+                new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = debounceTime });
+            return false;
+        }
+
+        isFirstCall = false;
+        if (DateTimeOffset.UtcNow - lastExecuted.Value < debounceTime) return true;
 
         _memoryCache.Set(cacheKey, DateTimeOffset.UtcNow,
             new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = debounceTime });
-        return true;
+        return false;
     }
 
     /// <summary>
