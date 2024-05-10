@@ -48,7 +48,7 @@ public class DebounceService : IDebounceService
 
         try
         {
-            action();
+            await Task.Run(action).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
