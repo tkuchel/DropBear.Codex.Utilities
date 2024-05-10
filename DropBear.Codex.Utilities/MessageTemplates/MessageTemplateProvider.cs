@@ -20,7 +20,6 @@ public class MessageTemplateProvider : IMessageTemplateProvider
     private readonly ILogger<MessageTemplateProvider> _logger;
     private readonly ConcurrentDictionary<string, string> _predefinedMessages = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, string> _templates = new(StringComparer.OrdinalIgnoreCase);
-
     public MessageTemplateProvider()
     {
         var loggerFactory = new LoggerConfigurationBuilder()
@@ -30,8 +29,6 @@ public class MessageTemplateProvider : IMessageTemplateProvider
 
         _logger = loggerFactory.CreateLogger<MessageTemplateProvider>();
     }
-
-
     /// <summary>
     ///     Registers a message template with the specified ID.
     /// </summary>
@@ -60,11 +57,9 @@ public class MessageTemplateProvider : IMessageTemplateProvider
                 return Result.Failure($"A template with the ID '{templateId}' has already been registered.");
         }
 
-        _logger.ZLogInformation($"Successfully registered template '{templateId}'.");
+        _logger.ZLogDebug($"Successfully registered template '{templateId}'.");
         return Result.Success();
     }
-
-
     public byte[] FormatUtf8(string templateOrMessageId, params object?[] args)
     {
         lock (_formatLock)
@@ -95,14 +90,11 @@ public class MessageTemplateProvider : IMessageTemplateProvider
             }
         }
     }
-
-
     public string FormatString(string templateOrMessageId, params object?[] args)
     {
         var utf8Bytes = FormatUtf8(templateOrMessageId, args);
         return Encoding.UTF8.GetString(utf8Bytes);
     }
-
     public Result RegisterTemplates(Dictionary<string, string> templatesToRegister)
     {
         List<string> errors = [];
@@ -114,8 +106,6 @@ public class MessageTemplateProvider : IMessageTemplateProvider
 
         return errors.Count is not 0 ? Result.Failure(string.Join('\n', errors)) : Result.Success();
     }
-
-
     /// <summary>
     ///     Registers a predefined message with the specified ID.
     /// </summary>
@@ -141,11 +131,9 @@ public class MessageTemplateProvider : IMessageTemplateProvider
                 return Result.Failure($"A predefined message with the ID '{messageId}' has already been registered.");
         }
 
-        _logger.ZLogInformation($"Successfully registered predefined message '{messageId}'.");
+        _logger.ZLogDebug($"Successfully registered predefined message '{messageId}'.");
         return Result.Success();
     }
-
-
     public Result RegisterPredefinedMessages(Dictionary<string, string> messagesToRegister)
     {
         List<string> errors = [];
@@ -157,12 +145,10 @@ public class MessageTemplateProvider : IMessageTemplateProvider
 
         return errors.Count is not 0 ? Result.Failure(string.Join('\n', errors)) : Result.Success();
     }
-
     private static Result ValidateInput(string id, string value, string type)
     {
         if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(value))
             return Result.Failure($"{type} ID and value cannot be null or whitespace.");
         return Result.Success();
     }
-
 }

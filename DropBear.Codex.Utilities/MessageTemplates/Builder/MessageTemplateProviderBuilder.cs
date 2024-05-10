@@ -137,7 +137,7 @@ public class MessageTemplateProviderBuilder
         {
             _predefinedMessages.Clear();
             _templates.Clear();
-            _logger.ZLogInformation($"MessageTemplateProvider instance built successfully.");
+            _logger.ZLogDebug($"MessageTemplateProvider instance built successfully.");
         }
     }
 }
