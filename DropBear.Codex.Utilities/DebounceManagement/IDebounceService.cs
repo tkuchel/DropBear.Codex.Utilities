@@ -1,4 +1,5 @@
-﻿using DropBear.Codex.Core;
+﻿using System.Runtime.CompilerServices;
+using DropBear.Codex.Core;
 
 namespace DropBear.Codex.Utilities.DebounceManagement;
 
@@ -11,8 +12,17 @@ public interface IDebounceService
     /// <param name="function">The function to execute.</param>
     /// <param name="key">A unique key identifying the function call for debouncing purposes.</param>
     /// <param name="debounceTime">The minimum time interval between successive executions.</param>
+    /// <param name="caller"></param>
+    /// <param name="filePath"></param>
+    /// <param name="lineNumber"></param>
     /// <returns>A task that represents the asynchronous operation, containing the result of the function execution.</returns>
-    Task<Result<T>> DebounceAsync<T>(Func<Task<Result<T>>> function, string key, TimeSpan debounceTime);
+    Task<Result<T>> DebounceAsync<T>(
+        Func<Task<Result<T>>> function,
+        string key = "",
+        TimeSpan? debounceTime = null,
+        [CallerMemberName] string caller = "",
+        [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0);
 
     /// <summary>
     ///     Debounces an action returning a non-generic Result.
@@ -20,6 +30,15 @@ public interface IDebounceService
     /// <param name="action">The action to execute.</param>
     /// <param name="key">A unique key identifying the action call for debouncing purposes.</param>
     /// <param name="debounceTime">The minimum time interval between successive executions.</param>
+    /// <param name="caller"></param>
+    /// <param name="filePath"></param>
+    /// <param name="lineNumber"></param>
     /// <returns>A task that represents the asynchronous operation, containing the result of the action execution.</returns>
-    Task<Result> DebounceAsync(Action action, string key, TimeSpan debounceTime);
+    Task<Result> DebounceAsync(
+        Action action,
+        string key = "",
+        TimeSpan? debounceTime = null,
+        [CallerMemberName] string caller = "",
+        [CallerFilePath] string filePath = "",
+        [CallerLineNumber] int lineNumber = 0);
 }
