@@ -1,8 +1,5 @@
 ﻿namespace DropBear.Codex.Utilities.Helpers;
 
-/// <summary>
-///     Provides helper methods for working with tasks, including implementing timeouts on tasks.
-/// </summary>
 public static class TaskHelper
 {
     /// <summary>
@@ -17,9 +14,8 @@ public static class TaskHelper
         TimeSpan timeout)
     {
         using var timeoutCancellationTokenSource = new CancellationTokenSource();
-        var completedTask =
-            await Task.WhenAny(taskSource.Task, Task.Delay(timeout, timeoutCancellationTokenSource.Token))
-                .ConfigureAwait(false);
+        var completedTask = await Task
+            .WhenAny(taskSource.Task, Task.Delay(timeout, timeoutCancellationTokenSource.Token)).ConfigureAwait(false);
 
         if (completedTask == taskSource.Task)
         {
@@ -33,36 +29,39 @@ public static class TaskHelper
 
         throw new TaskCanceledException("The operation has timed out.");
     }
-}
 
-// Example Usage:
-// public async Task<string> PerformOperationWithTimeoutAsync()
-// {
-//     var taskCompletionSource = new TaskCompletionSource<string>();
-//     var longRunningTask = PerformLongRunningOperationAsync();
-//
-//     longRunningTask.ContinueWith(task =>
-//     {
-//         if (task.IsFaulted)
-//         {
-//             taskCompletionSource.TrySetException(task.Exception.InnerExceptions);
-//         }
-//         else if (task.IsCanceled)
-//         {
-//             taskCompletionSource.TrySetCanceled();
-//         }
-//         else
-//         {
-//             taskCompletionSource.TrySetResult(task.Result);
-//         }
-//     }, TaskContinuationOptions.ExecuteSynchronously);
-//
-//     try
-//     {
-//         return await taskCompletionSource.TimeoutAfter(TimeSpan.FromSeconds(5));
-//     }
-//     catch (TaskCanceledException)
-//     {
-//         return "Operation Timed Out";
-//     }
-// }
+    /// <summary>
+    ///     Applies a timeout to a <see cref="Task" />.
+    /// </summary>
+    /// <param name="task">The task to apply the timeout to.</param>
+    /// <param name="timeout">The duration after which the task should be canceled if not completed.</param>
+    /// <returns>True if the task completed within the timeout; otherwise false.</returns>
+    public static async Task<bool> WithTimeout(this Task task, TimeSpan timeout)
+    {
+        var timeoutTask = Task.Delay(timeout);
+        var completedTask = await Task.WhenAny(task, timeoutTask).ConfigureAwait(false);
+
+        if (completedTask == timeoutTask) return false; // Timeout occurred
+
+        await task.ConfigureAwait(false); // Propagate any exceptions
+        return true; // Task completed within timeout
+    }
+
+    /// <summary>
+    ///     Applies a timeout to a <see cref="Task{TResult}" />.
+    /// </summary>
+    /// <typeparam name="T">The result type of the task.</typeparam>
+    /// <param name="task">The task to apply the timeout to.</param>
+    /// <param name="timeout">The duration after which the task should be canceled if not completed.</param>
+    /// <returns>A tuple indicating if the task completed and the result if it did.</returns>
+    public static async Task<(bool IsCompleted, T? Result)> WithTimeout<T>(this Task<T> task, TimeSpan timeout)
+    {
+        var timeoutTask = Task.Delay(timeout);
+        var completedTask = await Task.WhenAny(task, timeoutTask).ConfigureAwait(false);
+
+        if (completedTask == timeoutTask) return (false, default); // Timeout occurred
+
+        var result = await task.ConfigureAwait(false); // Propagate any exceptions and get result
+        return (true, result); // Task completed within timeout
+    }
+}
