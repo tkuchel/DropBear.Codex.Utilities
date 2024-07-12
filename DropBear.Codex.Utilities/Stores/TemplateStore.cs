@@ -32,7 +32,9 @@ public class TemplateStore<TTemplate, TField> where TTemplate : notnull
     /// <param name="templateName">The name of the template.</param>
     /// <param name="fields">The list of fields associated with the template.</param>
     /// <exception cref="ArgumentNullException">Thrown if templateName or fields is null.</exception>
+#pragma warning disable CA1002
     public void AddTemplate(TTemplate templateName, List<TField> fields)
+#pragma warning restore CA1002
     {
         if (templateName == null)
             throw new ArgumentNullException(nameof(templateName), "Template name cannot be null.");
@@ -49,7 +51,9 @@ public class TemplateStore<TTemplate, TField> where TTemplate : notnull
     /// <param name="templateName">The name of the template.</param>
     /// <returns>The list of fields associated with the template, or an empty list if the template is not found.</returns>
     /// <exception cref="ArgumentNullException">Thrown if templateName is null.</exception>
+#pragma warning disable CA1002
     public List<TField> GetTemplateFields(TTemplate templateName)
+#pragma warning restore CA1002
     {
         if (templateName == null)
             throw new ArgumentNullException(nameof(templateName), "Template name cannot be null.");

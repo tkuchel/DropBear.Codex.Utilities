@@ -171,7 +171,7 @@ public class DynamicFlagManager : IDynamicFlagManager
         if (data is null) LogErrorAndThrow("Failed to deserialize flag data.");
 
         _flagMap.Clear();
-        foreach (var (key, value) in data.Flags) _flagMap[key] = value;
+        foreach (var (key, value) in data!.Flags) _flagMap[key] = value;
 
         _flags = data.CurrentState;
         _nextFreeBit = data.NextFreeBit;
@@ -199,7 +199,7 @@ public class DynamicFlagManager : IDynamicFlagManager
 
     private sealed class SerializationData
     {
-        public Dictionary<string, int> Flags { get; set; }
+        public Dictionary<string, int> Flags { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public int CurrentState { get; set; }
         public int NextFreeBit { get; set; }
     }
