@@ -9,12 +9,12 @@ namespace DropBear.Codex.Utilities.Stores;
 /// <typeparam name="TField">The type of the field name.</typeparam>
 public class TemplateStore<TTemplate, TField> where TTemplate : notnull
 {
-    private readonly ConcurrentDictionary<TTemplate, List<TField>> _templateFields;
+    private readonly ConcurrentDictionary<TTemplate, List<TField>> _templateFields = new();
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="TemplateStore{TTemplate, TField}" /> class.
     /// </summary>
-    public TemplateStore() => _templateFields = new ConcurrentDictionary<TTemplate, List<TField>>();
+    public TemplateStore() { }
 
     /// <summary>
     ///     Gets the number of templates in the store.
@@ -31,14 +31,13 @@ public class TemplateStore<TTemplate, TField> where TTemplate : notnull
     /// </summary>
     /// <param name="templateName">The name of the template.</param>
     /// <param name="fields">The list of fields associated with the template.</param>
-#pragma warning disable CA1002
+    /// <exception cref="ArgumentNullException">Thrown if templateName or fields is null.</exception>
     public void AddTemplate(TTemplate templateName, List<TField> fields)
-#pragma warning restore CA1002
     {
-        if (templateName is null)
+        if (templateName == null)
             throw new ArgumentNullException(nameof(templateName), "Template name cannot be null.");
 
-        if (fields is null)
+        if (fields == null)
             throw new ArgumentNullException(nameof(fields), "Fields cannot be null.");
 
         _templateFields.TryAdd(templateName, fields);
@@ -49,14 +48,13 @@ public class TemplateStore<TTemplate, TField> where TTemplate : notnull
     /// </summary>
     /// <param name="templateName">The name of the template.</param>
     /// <returns>The list of fields associated with the template, or an empty list if the template is not found.</returns>
-#pragma warning disable CA1002
+    /// <exception cref="ArgumentNullException">Thrown if templateName is null.</exception>
     public List<TField> GetTemplateFields(TTemplate templateName)
-#pragma warning restore CA1002
     {
-        if (templateName is null)
+        if (templateName == null)
             throw new ArgumentNullException(nameof(templateName), "Template name cannot be null.");
 
-        return _templateFields.TryGetValue(templateName, out var fields) ? fields : [];
+        return _templateFields.TryGetValue(templateName, out var fields) ? fields : new List<TField>();
     }
 
     /// <summary>
@@ -64,9 +62,10 @@ public class TemplateStore<TTemplate, TField> where TTemplate : notnull
     /// </summary>
     /// <param name="templateName">The name of the template to remove.</param>
     /// <returns><c>true</c> if the template was successfully removed; otherwise, <c>false</c>.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if templateName is null.</exception>
     public bool RemoveTemplate(TTemplate templateName)
     {
-        if (templateName is null)
+        if (templateName == null)
             throw new ArgumentNullException(nameof(templateName), "Template name cannot be null.");
 
         return _templateFields.TryRemove(templateName, out _);
@@ -77,9 +76,10 @@ public class TemplateStore<TTemplate, TField> where TTemplate : notnull
     /// </summary>
     /// <param name="templateName">The name of the template to check.</param>
     /// <returns><c>true</c> if the store contains the specified template; otherwise, <c>false</c>.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if templateName is null.</exception>
     public bool ContainsTemplate(TTemplate templateName)
     {
-        if (templateName is null)
+        if (templateName == null)
             throw new ArgumentNullException(nameof(templateName), "Template name cannot be null.");
 
         return _templateFields.ContainsKey(templateName);

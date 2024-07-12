@@ -4,6 +4,9 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace DropBear.Codex.Utilities.DebounceManagement;
 
+/// <summary>
+///     Service for managing debounced function or action calls.
+/// </summary>
 public class DebounceService : IDebounceService
 {
     private readonly TimeSpan _defaultDebounceTime = TimeSpan.FromSeconds(30);
@@ -17,21 +20,13 @@ public class DebounceService : IDebounceService
     public DebounceService(IMemoryCache memoryCache) => _memoryCache = memoryCache;
 
     /// <summary>
-    ///     Debounces a function that returns a generic Result
-    ///     <T>
-    ///         . Ensures that the function is not executed more frequently
-    ///         than the specified minimum interval.
+    ///     Debounces a function that returns a generic Result&lt;T&gt;.
+    ///     Ensures that the function is not executed more frequently than the specified minimum interval.
     /// </summary>
     /// <typeparam name="T">The type of the result returned by the function.</typeparam>
-    /// <param name="function">The function to execute which returns a Task of Result<T>.</param>
-    /// <param name="key">
-    ///     An optional unique identifier for the function call used for debouncing purposes. If not provided,
-    ///     a key will be generated based on the caller's details.
-    /// </param>
-    /// <param name="debounceTime">
-    ///     The minimum time interval between successive executions. If not provided, a default
-    ///     interval of 30 seconds is used.
-    /// </param>
+    /// <param name="function">The function to execute which returns a Task of Result&lt;T&gt;.</param>
+    /// <param name="key">An optional unique identifier for the function call used for debouncing purposes.</param>
+    /// <param name="debounceTime">The minimum time interval between successive executions.</param>
     /// <param name="caller">Automatically filled by the compiler to provide the method name of the caller.</param>
     /// <param name="filePath">Automatically filled by the compiler to provide the source file path of the caller.</param>
     /// <param name="lineNumber">
@@ -39,8 +34,8 @@ public class DebounceService : IDebounceService
     ///     caller.
     /// </param>
     /// <returns>
-    ///     A task that represents the asynchronous operation, containing a Result
-    ///     <T> indicating the outcome of the function execution.
+    ///     A task that represents the asynchronous operation, containing a Result&lt;T&gt; indicating the outcome of the
+    ///     function execution.
     /// </returns>
     public async Task<Result<T>> DebounceAsync<T>(
         Func<Task<Result<T>>> function,
@@ -67,18 +62,12 @@ public class DebounceService : IDebounceService
     }
 
     /// <summary>
-    ///     Debounces an action that does not return a value. Ensures that the action is not executed more frequently
-    ///     than the specified minimum interval.
+    ///     Debounces an action that does not return a value. Ensures that the action is not executed more frequently than the
+    ///     specified minimum interval.
     /// </summary>
     /// <param name="action">The action to execute.</param>
-    /// <param name="key">
-    ///     An optional unique identifier for the action call used for debouncing purposes. If not provided,
-    ///     a key will be generated based on the caller's details.
-    /// </param>
-    /// <param name="debounceTime">
-    ///     The minimum time interval between successive executions. If not provided, a default
-    ///     interval of 30 seconds is used.
-    /// </param>
+    /// <param name="key">An optional unique identifier for the action call used for debouncing purposes.</param>
+    /// <param name="debounceTime">The minimum time interval between successive executions.</param>
     /// <param name="caller">Automatically filled by the compiler to provide the method name of the caller.</param>
     /// <param name="filePath">Automatically filled by the compiler to provide the source file path of the caller.</param>
     /// <param name="lineNumber">
@@ -115,36 +104,21 @@ public class DebounceService : IDebounceService
     }
 
     /// <summary>
-    ///     Debounces a function that returns a Task of Result. This method ensures that the function is not executed
-    ///     more frequently than the specified minimum interval. If the function is called again before the interval
-    ///     has elapsed, it returns a failure Result indicating that the operation was debounced.
+    ///     Debounces a function that returns a Task of Result.
+    ///     Ensures that the function is not executed more frequently than the specified minimum interval.
     /// </summary>
-    /// <param name="function">The asynchronous function to execute, expected to return a Task of Result.</param>
-    /// <param name="key">
-    ///     An optional unique identifier for the function call used for debouncing purposes.
-    ///     If not provided, a key will be generated based on the caller's details.
-    /// </param>
-    /// <param name="debounceTime">
-    ///     The minimum time interval between successive executions. If not provided,
-    ///     a default interval of 30 seconds is used.
-    /// </param>
-    /// <param name="caller">
-    ///     Automatically filled by the compiler to provide the method name of the caller. This is
-    ///     used to generate a unique key if no explicit key is provided.
-    /// </param>
-    /// <param name="filePath">
-    ///     Automatically filled by the compiler to provide the source file path of the caller. This is
-    ///     also used in key generation if no explicit key is provided.
-    /// </param>
+    /// <param name="function">The asynchronous function to execute.</param>
+    /// <param name="key">An optional unique identifier for the function call used for debouncing purposes.</param>
+    /// <param name="debounceTime">The minimum time interval between successive executions.</param>
+    /// <param name="caller">Automatically filled by the compiler to provide the method name of the caller.</param>
+    /// <param name="filePath">Automatically filled by the compiler to provide the source file path of the caller.</param>
     /// <param name="lineNumber">
     ///     Automatically filled by the compiler to provide the line number in the source code of the
-    ///     caller. This helps further in generating a uniquely identifying key if required.
+    ///     caller.
     /// </param>
     /// <returns>
-    ///     A Task representing the asynchronous operation, which upon completion contains a Result indicating
-    ///     the outcome of the debounced function execution. If the function is debounced, the Result will indicate failure
-    ///     with a message stating "Operation debounced." If the function throws an exception, the Result will also indicate
-    ///     failure with a message describing the exception.
+    ///     A task that represents the asynchronous operation, containing a Result indicating the outcome of the debounced
+    ///     function execution.
     /// </returns>
     public async Task<Result> DebounceAsync(
         Func<Task<Result>> function,
@@ -169,7 +143,6 @@ public class DebounceService : IDebounceService
             return Result.Failure("An error occurred while executing the function.", ex);
         }
     }
-
 
     /// <summary>
     ///     Checks if a given key has been debounced within the specified timeframe and identifies if it's the first call.
@@ -208,9 +181,6 @@ public class DebounceService : IDebounceService
     /// <param name="filePath">The file path of the caller.</param>
     /// <param name="lineNumber">The line number of the caller's call in the source code.</param>
     /// <returns>A unique key generated or modified based on the input parameters.</returns>
-    private static string GenerateKey(string key, string caller, string filePath, int lineNumber)
-    {
-        if (string.IsNullOrEmpty(key)) key = $"{caller}-{filePath}-{lineNumber}";
-        return key;
-    }
+    private static string GenerateKey(string key, string caller, string filePath, int lineNumber) =>
+        string.IsNullOrEmpty(key) ? $"{caller}-{filePath}-{lineNumber}" : key;
 }
