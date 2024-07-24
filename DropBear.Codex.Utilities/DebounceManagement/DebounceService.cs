@@ -1,6 +1,10 @@
-﻿using System.Runtime.CompilerServices;
+﻿#region
+
+using System.Runtime.CompilerServices;
 using DropBear.Codex.Core;
 using Microsoft.Extensions.Caching.Memory;
+
+#endregion
 
 namespace DropBear.Codex.Utilities.DebounceManagement;
 
@@ -17,7 +21,10 @@ public class DebounceService : IDebounceService
     ///     Uses an IMemoryCache to store timestamps for debouncing function or action calls.
     /// </summary>
     /// <param name="memoryCache">The memory cache used to store timestamps for debouncing.</param>
-    public DebounceService(IMemoryCache memoryCache) => _memoryCache = memoryCache;
+    public DebounceService(IMemoryCache memoryCache)
+    {
+        _memoryCache = memoryCache;
+    }
 
     /// <summary>
     ///     Debounces a function that returns a generic Result&lt;T&gt;.
@@ -49,7 +56,9 @@ public class DebounceService : IDebounceService
         debounceTime ??= _defaultDebounceTime;
 
         if (IsDebounced(key, debounceTime.Value, out var isFirstCall) && !isFirstCall)
+        {
             return Result<T>.Failure("Operation debounced.");
+        }
 
         try
         {
@@ -90,7 +99,9 @@ public class DebounceService : IDebounceService
         debounceTime ??= _defaultDebounceTime;
 
         if (IsDebounced(key, debounceTime.Value, out var isFirstCall) && !isFirstCall)
+        {
             return Result.Failure("Operation debounced.");
+        }
 
         try
         {
@@ -132,7 +143,9 @@ public class DebounceService : IDebounceService
         debounceTime ??= _defaultDebounceTime;
 
         if (IsDebounced(key, debounceTime.Value, out var isFirstCall) && !isFirstCall)
+        {
             return Result.Failure("Operation debounced.");
+        }
 
         try
         {
@@ -165,7 +178,10 @@ public class DebounceService : IDebounceService
         }
 
         isFirstCall = false;
-        if (DateTimeOffset.UtcNow - lastExecuted.Value < debounceTime) return true;
+        if (DateTimeOffset.UtcNow - lastExecuted.Value < debounceTime)
+        {
+            return true;
+        }
 
         _memoryCache.Set(cacheKey, DateTimeOffset.UtcNow,
             new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = debounceTime });
@@ -181,6 +197,8 @@ public class DebounceService : IDebounceService
     /// <param name="filePath">The file path of the caller.</param>
     /// <param name="lineNumber">The line number of the caller's call in the source code.</param>
     /// <returns>A unique key generated or modified based on the input parameters.</returns>
-    private static string GenerateKey(string key, string caller, string filePath, int lineNumber) =>
-        string.IsNullOrEmpty(key) ? $"{caller}-{filePath}-{lineNumber}" : key;
+    private static string GenerateKey(string key, string caller, string filePath, int lineNumber)
+    {
+        return string.IsNullOrEmpty(key) ? $"{caller}-{filePath}-{lineNumber}" : key;
+    }
 }

@@ -1,9 +1,13 @@
-﻿using System.Globalization;
+﻿#region
+
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+
+#endregion
 
 namespace DropBear.Codex.Utilities.Helpers;
 
@@ -13,7 +17,7 @@ namespace DropBear.Codex.Utilities.Helpers;
 public static partial class StringHelper
 {
     /// <summary>
-    /// Formats the string according to the provided arguments.
+    ///     Formats the string according to the provided arguments.
     /// </summary>
     /// <param name="template">The string template containing placeholders.</param>
     /// <param name="args">The arguments to format into the template.</param>
@@ -23,7 +27,7 @@ public static partial class StringHelper
         ArgumentNullException.ThrowIfNull(template);
         return string.Format(template, args);
     }
-    
+
     /// <summary>
     ///     Converts the first character of a string to uppercase.
     /// </summary>
@@ -31,7 +35,7 @@ public static partial class StringHelper
     /// <returns>The input string with its first character in uppercase.</returns>
     public static string FirstCharToUpper(this string input)
     {
-        return string.IsNullOrEmpty(input) ? input : char.ToUpper(input[0],CultureInfo.CurrentCulture) + input[1..];
+        return string.IsNullOrEmpty(input) ? input : char.ToUpper(input[0], CultureInfo.CurrentCulture) + input[1..];
     }
 
     /// <summary>
@@ -41,7 +45,10 @@ public static partial class StringHelper
     /// <returns>The string with each sentence capitalized.</returns>
     public static string CapitalizeSentence(this string input)
     {
-        if (string.IsNullOrWhiteSpace(input)) return input;
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return input;
+        }
 
         var result = new StringBuilder(input.Length);
         var shouldCapitalize = true;
@@ -57,7 +64,9 @@ public static partial class StringHelper
             {
                 result.Append(c);
                 if (c is '.' or '!' or '?')
+                {
                     shouldCapitalize = char.IsWhiteSpace(c) || result.Length == input.Length - 1;
+                }
             }
         }
 
@@ -74,7 +83,9 @@ public static partial class StringHelper
     {
         if (DateTime.TryParseExact(dateString, ["MM/dd/yy", "M/d/yy", "dd/MM/yyyy"],
                 CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
+        {
             return (parsedDate.Month, parsedDate.Day, parsedDate.Year);
+        }
 
         return null;
     }
@@ -90,7 +101,10 @@ public static partial class StringHelper
         StringComparison comparisonType = StringComparison.Ordinal)
     {
         ArgumentNullException.ThrowIfNull(str);
-        if (!str.EndsWith(c.ToString(CultureInfo.InvariantCulture), comparisonType)) return str + c;
+        if (!str.EndsWith(c.ToString(CultureInfo.InvariantCulture), comparisonType))
+        {
+            return str + c;
+        }
 
         return str;
     }
@@ -110,7 +124,7 @@ public static partial class StringHelper
     }
 
     /// <summary>
-    /// Converts a string to a SHA256 hash.
+    ///     Converts a string to a SHA256 hash.
     /// </summary>
     /// <param name="str">The string to convert.</param>
     /// <returns>The SHA256 hash of the string.</returns>
@@ -122,7 +136,9 @@ public static partial class StringHelper
 
         var sb = new StringBuilder();
         foreach (var hashByte in hashBytes)
+        {
             sb.Append(hashByte.ToString("X2"));
+        }
 
         return sb.ToString();
     }
@@ -149,18 +165,23 @@ public static partial class StringHelper
     }
 
     /// <summary>
-    /// Converts a string to PascalCase with a regex evaluation timeout.
+    ///     Converts a string to PascalCase with a regex evaluation timeout.
     /// </summary>
     /// <param name="input">The string to convert.</param>
     /// <returns>The input string in PascalCase.</returns>
     public static string ToPascalCase(this string input)
     {
-        if (string.IsNullOrEmpty(input)) return input;
+        if (string.IsNullOrEmpty(input))
+        {
+            return input;
+        }
 
         var textInfo = CultureInfo.CurrentCulture.TextInfo;
         // Set a timeout of 1 second for regex evaluation to enhance security and performance
-        var formattedString = Regex.Replace(input, "(?<=[a-z])([A-Z])", " $1", RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(1)).Trim();
-        return textInfo.ToTitleCase(formattedString.ToUpperInvariant()).Replace(" ", string.Empty, StringComparison.Ordinal);
+        var formattedString = Regex.Replace(input, "(?<=[a-z])([A-Z])", " $1", RegexOptions.ExplicitCapture,
+            TimeSpan.FromSeconds(1)).Trim();
+        return textInfo.ToTitleCase(formattedString.ToUpperInvariant())
+            .Replace(" ", string.Empty, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -215,11 +236,15 @@ public static partial class StringHelper
         ArgumentNullException.ThrowIfNull(value);
 
         var secureString = new SecureString();
-        foreach (var c in value) secureString.AppendChar(c);
+        foreach (var c in value)
+        {
+            secureString.AppendChar(c);
+        }
+
         secureString.MakeReadOnly();
         return secureString;
     }
 
-    [GeneratedRegex("(?<=[a-z])([A-Z])", RegexOptions.ExplicitCapture,1000)]
+    [GeneratedRegex("(?<=[a-z])([A-Z])", RegexOptions.ExplicitCapture, 1000)]
     private static partial Regex WordifyRegex();
 }

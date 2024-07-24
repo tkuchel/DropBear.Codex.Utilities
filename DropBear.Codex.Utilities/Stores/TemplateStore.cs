@@ -1,4 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿#region
+
+using System.Collections.Concurrent;
+
+#endregion
 
 namespace DropBear.Codex.Utilities.Stores;
 
@@ -37,10 +41,14 @@ public class TemplateStore<TTemplate, TField> where TTemplate : notnull
 #pragma warning restore CA1002
     {
         if (templateName == null)
+        {
             throw new ArgumentNullException(nameof(templateName), "Template name cannot be null.");
+        }
 
         if (fields == null)
+        {
             throw new ArgumentNullException(nameof(fields), "Fields cannot be null.");
+        }
 
         _templateFields.TryAdd(templateName, fields);
     }
@@ -56,7 +64,9 @@ public class TemplateStore<TTemplate, TField> where TTemplate : notnull
 #pragma warning restore CA1002
     {
         if (templateName == null)
+        {
             throw new ArgumentNullException(nameof(templateName), "Template name cannot be null.");
+        }
 
         return _templateFields.TryGetValue(templateName, out var fields) ? fields : new List<TField>();
     }
@@ -70,7 +80,9 @@ public class TemplateStore<TTemplate, TField> where TTemplate : notnull
     public bool RemoveTemplate(TTemplate templateName)
     {
         if (templateName == null)
+        {
             throw new ArgumentNullException(nameof(templateName), "Template name cannot be null.");
+        }
 
         return _templateFields.TryRemove(templateName, out _);
     }
@@ -84,7 +96,9 @@ public class TemplateStore<TTemplate, TField> where TTemplate : notnull
     public bool ContainsTemplate(TTemplate templateName)
     {
         if (templateName == null)
+        {
             throw new ArgumentNullException(nameof(templateName), "Template name cannot be null.");
+        }
 
         return _templateFields.ContainsKey(templateName);
     }

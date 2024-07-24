@@ -1,6 +1,10 @@
-﻿using System.Text.Encodings.Web;
+﻿#region
+
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
+#endregion
 
 namespace DropBear.Codex.Utilities.Configurations;
 

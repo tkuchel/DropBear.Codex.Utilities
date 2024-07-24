@@ -1,6 +1,10 @@
-﻿using MessagePack;
+﻿#region
+
+using MessagePack;
 using MessagePack.ImmutableCollection;
 using MessagePack.Resolvers;
+
+#endregion
 
 namespace DropBear.Codex.Utilities.Configurations;
 

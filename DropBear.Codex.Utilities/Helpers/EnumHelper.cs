@@ -1,4 +1,8 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
+
+#endregion
 
 namespace DropBear.Codex.Utilities.Helpers;
 
@@ -18,8 +22,12 @@ public static class EnumHelper
         var type = value.GetType();
         var fieldInfo = type.GetField(value.ToString());
 
-        if (fieldInfo == null) return value.ToString();
-        var attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), inherit: false);
+        if (fieldInfo == null)
+        {
+            return value.ToString();
+        }
+
+        var attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
 
         return attributes.Length > 0 ? attributes[0].Description : value.ToString();
     }
@@ -35,7 +43,9 @@ public static class EnumHelper
         var type = value.GetType();
         var name = Enum.GetName(type, value);
 
-        return name is not null ? type.GetField(name)?.GetCustomAttributes(inherit: false).OfType<TAttribute>().SingleOrDefault() : null;
+        return name is not null
+            ? type.GetField(name)?.GetCustomAttributes(false).OfType<TAttribute>().SingleOrDefault()
+            : null;
     }
 
     /// <summary>
@@ -56,7 +66,7 @@ public static class EnumHelper
             // Log the error, return default enum value, or rethrow a custom exception
             // For example, you might want to log and return the default value:
             Console.WriteLine($"Failed to parse '{value}' into enum {typeof(T).Name}: {ex.Message}");
-            return default(T);
+            return default;
         }
     }
 

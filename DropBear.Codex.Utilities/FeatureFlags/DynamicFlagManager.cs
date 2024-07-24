@@ -1,8 +1,12 @@
-﻿using System.Collections.Concurrent;
+﻿#region
+
+using System.Collections.Concurrent;
 using System.Text.Json;
 using DropBear.Codex.AppLogger.Builders;
 using Microsoft.Extensions.Logging;
 using ZLogger;
+
+#endregion
 
 namespace DropBear.Codex.Utilities.FeatureFlags;
 
@@ -41,7 +45,9 @@ public class DynamicFlagManager : IDynamicFlagManager
     public void AddFlag(string flagName)
     {
         if (_flagMap.ContainsKey(flagName) || _nextFreeBit >= 32)
+        {
             LogErrorAndThrow("Flag already exists or limit exceeded.");
+        }
 
         _flagMap[flagName] = 1 << _nextFreeBit++;
         _cache.Clear(); // Reset the cache to ensure consistency.
@@ -133,9 +139,14 @@ public class DynamicFlagManager : IDynamicFlagManager
     public bool IsFlagSet(string flagName)
     {
         if (_cache.TryGetValue(flagName, out var isSet))
+        {
             return isSet;
+        }
 
-        if (!_flagMap.TryGetValue(flagName, out var bitValue)) LogErrorAndThrow("Flag not found.");
+        if (!_flagMap.TryGetValue(flagName, out var bitValue))
+        {
+            LogErrorAndThrow("Flag not found.");
+        }
 
         isSet = (_flags & bitValue) == bitValue;
         _cache[flagName] = isSet; // Cache the result.
@@ -168,10 +179,16 @@ public class DynamicFlagManager : IDynamicFlagManager
     public void Deserialize(string serializedData)
     {
         var data = JsonSerializer.Deserialize<SerializationData>(serializedData);
-        if (data is null) LogErrorAndThrow("Failed to deserialize flag data.");
+        if (data is null)
+        {
+            LogErrorAndThrow("Failed to deserialize flag data.");
+        }
 
         _flagMap.Clear();
-        foreach (var (key, value) in data!.Flags) _flagMap[key] = value;
+        foreach (var (key, value) in data!.Flags)
+        {
+            _flagMap[key] = value;
+        }
 
         _flags = data.CurrentState;
         _nextFreeBit = data.NextFreeBit;
@@ -183,8 +200,10 @@ public class DynamicFlagManager : IDynamicFlagManager
     ///     Returns a list of all flags and their current states.
     /// </summary>
     /// <returns>A dictionary with flag names as keys and their states as values.</returns>
-    public Dictionary<string, bool> GetAllFlags() =>
-        _flagMap.Keys.ToDictionary(flag => flag, IsFlagSet, StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, bool> GetAllFlags()
+    {
+        return _flagMap.Keys.ToDictionary(flag => flag, IsFlagSet, StringComparer.OrdinalIgnoreCase);
+    }
 
     /// <summary>
     ///     Logs an error message and throws an exception.

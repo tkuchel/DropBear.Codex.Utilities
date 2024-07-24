@@ -1,4 +1,8 @@
-﻿using System.Security.Cryptography;
+﻿#region
+
+using System.Security.Cryptography;
+
+#endregion
 
 namespace DropBear.Codex.Utilities.Helpers;
 
@@ -44,7 +48,7 @@ public static class HashingHelper
         Buffer.BlockCopy(combinedBytes, saltSize, hash, 0, hash.Length);
         return (salt, hash);
     }
-    
+
     // Convert byte array to string
     public static string ConvertByteArrayToBase64String(byte[] byteArray)
     {
@@ -57,4 +61,3 @@ public static class HashingHelper
         return Convert.FromBase64String(str);
     }
 }
-

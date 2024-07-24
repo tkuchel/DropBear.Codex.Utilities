@@ -1,8 +1,12 @@
-﻿using DropBear.Codex.Utilities.DebounceManagement;
+﻿#region
+
+using DropBear.Codex.Utilities.DebounceManagement;
 using DropBear.Codex.Utilities.FeatureFlags;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+
+#endregion
 
 namespace DropBear.Codex.Utilities.Extensions;
 
@@ -29,7 +33,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDebounceService(this IServiceCollection services)
     {
         // Ensure MemoryCache is registered
-        if (services.All(x => x.ServiceType != typeof(IMemoryCache))) services.AddMemoryCache();
+        if (services.All(x => x.ServiceType != typeof(IMemoryCache)))
+        {
+            services.AddMemoryCache();
+        }
 
         // Ensure that DebounceService is only added once
         services.TryAddSingleton<IDebounceService, DebounceService>();

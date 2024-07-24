@@ -1,6 +1,11 @@
-﻿using System.Security.Cryptography;
+﻿#region
+
+using System.Security.Cryptography;
 using System.Text;
 using DropBear.Codex.Utilities.Converters;
+
+#endregion
+
 namespace DropBear.Codex.Utilities.Encryption;
 
 public static class RudimentaryEncryptor
@@ -22,7 +27,9 @@ public static class RudimentaryEncryptor
 
         var obfuscatedBinary = new StringBuilder(binaryWithHash.Length);
         foreach (var (c, random) in binaryWithHash.Zip(pseudoRandomSequence))
+        {
             obfuscatedBinary.Append((c == '0' ? '1' : '0') ^ (random % 2));
+        }
 
         return BinaryAndHexConverter.BinaryToHex(obfuscatedBinary.ToString());
     }
@@ -34,7 +41,9 @@ public static class RudimentaryEncryptor
 
         var deobfuscatedBinary = new StringBuilder(binary.Length);
         foreach (var (c, random) in binary.Zip(pseudoRandomSequence))
+        {
             deobfuscatedBinary.Append((c ^ (random % 2)) == '0' ? '1' : '0');
+        }
 
         var originalBinary = deobfuscatedBinary.ToString()[..^256];
         var hashBinary = deobfuscatedBinary.ToString()[^256..];
@@ -42,7 +51,9 @@ public static class RudimentaryEncryptor
         var hash = BinaryAndHexConverter.BinaryToString(hashBinary);
 
         if (GenerateHash(originalValue) != hash)
+        {
             throw new InvalidOperationException("Data integrity check failed - hash mismatch.");
+        }
 
         return originalValue;
     }

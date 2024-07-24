@@ -1,5 +1,9 @@
-﻿using System.Reflection;
+﻿#region
+
+using System.Reflection;
 using System.Reflection.Emit;
+
+#endregion
 
 namespace DropBear.Codex.Utilities.Extensions;
 
@@ -8,13 +12,17 @@ public static class ReadOnlyExtensions
     public static object? GetReadOnlyVersion(this object? obj)
     {
         if (obj is null)
+        {
             return null;
+        }
 
         var type = obj.GetType();
 
         // For value types (structs), just return the original instance
         if (type.IsValueType)
+        {
             return obj;
+        }
 
         // For reference types (classes), create a read-only wrapper
         var readOnlyType = CreateReadOnlyType(type);
@@ -52,7 +60,9 @@ public static class ReadOnlyExtensions
         {
             var getMethod = property.GetGetMethod();
             if (getMethod is null)
+            {
                 continue; // Skip properties without a getter
+            }
 
             var readOnlyProperty =
                 typeBuilder.DefineProperty(property.Name, PropertyAttributes.None, property.PropertyType, null);

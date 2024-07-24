@@ -14,9 +14,15 @@ public static class ArrayHelper
 
             var bytesToPrint = Math.Min(BytesPerLine, bytesRemaining);
 
-            for (var i = 0; i < bytesToPrint; i++) Console.Write("{0:X2} ", bytes[bytesRead + i]);
+            for (var i = 0; i < bytesToPrint; i++)
+            {
+                Console.Write("{0:X2} ", bytes[bytesRead + i]);
+            }
 
-            for (var i = bytesToPrint; i < BytesPerLine; i++) Console.Write("   ");
+            for (var i = bytesToPrint; i < BytesPerLine; i++)
+            {
+                Console.Write("   ");
+            }
 
             Console.Write(" ");
 
@@ -33,7 +39,7 @@ public static class ArrayHelper
             bytesRemaining -= bytesToPrint;
         }
     }
-    
+
     public static void CompareBytesArrays(byte[] array1, byte[] array2)
     {
         Console.WriteLine("Comparing byte arrays...");
@@ -44,21 +50,21 @@ public static class ArrayHelper
             Console.WriteLine($"The arrays have different lengths: {array1.Length} and {array2.Length}.");
         }
 
-        int diffCount = 0;
-        int bytesPerLine = 16;
-        int maxLength = Math.Max(array1.Length, array2.Length);
+        var diffCount = 0;
+        var bytesPerLine = 16;
+        var maxLength = Math.Max(array1.Length, array2.Length);
 
-        for (int i = 0; i < maxLength; i += bytesPerLine)
+        for (var i = 0; i < maxLength; i += bytesPerLine)
         {
-            int bytesToPrint = Math.Min(bytesPerLine, maxLength - i);
+            var bytesToPrint = Math.Min(bytesPerLine, maxLength - i);
 
             // Print the offset
             Console.Write($"{i:X8}: ");
 
             // Print the bytes for array1
-            for (int j = 0; j < bytesToPrint; j++)
+            for (var j = 0; j < bytesToPrint; j++)
             {
-                int index = i + j;
+                var index = i + j;
                 if (index < array1.Length)
                 {
                     Console.Write($"{array1[index]:X2} ");
@@ -72,9 +78,9 @@ public static class ArrayHelper
             Console.Write(" ");
 
             // Print the bytes for array2
-            for (int j = 0; j < bytesToPrint; j++)
+            for (var j = 0; j < bytesToPrint; j++)
             {
-                int index = i + j;
+                var index = i + j;
                 if (index < array2.Length)
                 {
                     Console.Write($"{array2[index]:X2} ");

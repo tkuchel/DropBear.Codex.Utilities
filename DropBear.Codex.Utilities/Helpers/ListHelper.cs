@@ -1,4 +1,8 @@
-﻿using System.Collections.ObjectModel;
+﻿#region
+
+using System.Collections.ObjectModel;
+
+#endregion
 
 namespace DropBear.Codex.Utilities.Helpers;
 
@@ -13,5 +17,8 @@ public static class ListHelper
     /// <typeparam name="T">The type of elements in the list.</typeparam>
     /// <param name="list">The source <see cref="List{T}" /> instance.</param>
     /// <returns>A <see cref="ReadOnlyCollection{T}" /> that wraps the source list.</returns>
-    public static ReadOnlyCollection<T> ToReadOnlyCollection<T>(this List<T> list) => new(list);
+    public static ReadOnlyCollection<T> ToReadOnlyCollection<T>(this List<T> list)
+    {
+        return new ReadOnlyCollection<T>(list);
+    }
 }

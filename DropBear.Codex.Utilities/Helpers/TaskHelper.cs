@@ -41,7 +41,10 @@ public static class TaskHelper
         var timeoutTask = Task.Delay(timeout);
         var completedTask = await Task.WhenAny(task, timeoutTask).ConfigureAwait(false);
 
-        if (completedTask == timeoutTask) return false; // Timeout occurred
+        if (completedTask == timeoutTask)
+        {
+            return false; // Timeout occurred
+        }
 
         await task.ConfigureAwait(false); // Propagate any exceptions
         return true; // Task completed within timeout
@@ -59,7 +62,10 @@ public static class TaskHelper
         var timeoutTask = Task.Delay(timeout);
         var completedTask = await Task.WhenAny(task, timeoutTask).ConfigureAwait(false);
 
-        if (completedTask == timeoutTask) return (false, default); // Timeout occurred
+        if (completedTask == timeoutTask)
+        {
+            return (false, default); // Timeout occurred
+        }
 
         var result = await task.ConfigureAwait(false); // Propagate any exceptions and get result
         return (true, result); // Task completed within timeout
